@@ -120,13 +120,13 @@
                 <version>3.3.1</version>
                 <configuration>
 
-<!--                    <webResources>-->
-<!--                        <resource>-->
-<!--                            <directory>-->
-<!--                                D:\Flutter Projects\Flutter_Proj\flutter_proj\build\web-->
-<!--                            </directory>-->
-<!--                        </resource>-->
-<!--                    </webResources>-->
+                    <webResources>
+                        <resource>
+                            <directory>
+                                D:\Flutter Projects\Flutter_Univ\flutter_univ\build\web
+                            </directory>
+                        </resource>
+                    </webResources>
 
                     <outputDirectory>D:\Java project\glassfish6\glassfish\domains\FSB\autodeploy</outputDirectory>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
