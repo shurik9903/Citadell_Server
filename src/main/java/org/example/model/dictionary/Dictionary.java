@@ -4,13 +4,8 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
-import org.example.data.mydata.DLogin;
 import org.example.model.database.IDataBaseWork;
-import org.example.model.login.ILogin;
-import org.example.model.token.ITokenIssuer;
-import org.example.model.token.ITokenKey;
-import org.example.model.token.TokenIssuer;
-import org.example.model.token.TokenKey;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +22,7 @@ public class Dictionary implements IDictionary {
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server.");
+                Result.put("Msg", "Not connection to server..");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 

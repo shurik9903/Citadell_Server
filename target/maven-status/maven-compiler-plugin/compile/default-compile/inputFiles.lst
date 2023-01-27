@@ -3,6 +3,8 @@ D:\Java project\FSB\src\main\java\org\example\model\analysis\IAnalysis.java
 D:\Java project\FSB\src\main\java\org\example\model\dictionary\Dictionary.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenKey.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenIssuer.java
+D:\Java project\FSB\src\main\java\org\example\data\entity\EFile.java
+D:\Java project\FSB\src\main\java\org\example\data\mydata\DFile.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenValidator.java
 D:\Java project\FSB\src\main\java\org\example\model\database\IDataBaseWork.java
 D:\Java project\FSB\src\main\java\org\example\data\mydata\DLogin.java
@@ -15,6 +17,7 @@ D:\Java project\FSB\src\main\java\org\example\model\token\TokenValidator.java
 D:\Java project\FSB\src\main\java\org\example\controller\Ping.java
 D:\Java project\FSB\src\main\java\org\example\model\analysis\Analysis.java
 D:\Java project\FSB\src\main\java\org\example\controller\DictionaryController.java
+D:\Java project\FSB\src\main\java\org\example\data\mydata\DExcel.java
 D:\Java project\FSB\src\main\java\org\example\controller\DocController.java
 D:\Java project\FSB\src\main\java\org\example\model\login\ILogin.java
 D:\Java project\FSB\src\main\java\org\example\model\login\Login.java
@@ -23,3 +26,4 @@ D:\Java project\FSB\src\main\java\org\example\controller\LoginController.java
 D:\Java project\FSB\src\main\java\org\example\model\dictionary\IDictionary.java
 D:\Java project\FSB\src\main\java\org\example\model\token\TokenKey.java
 D:\Java project\FSB\src\main\java\org\example\data\entity\ELogin.java
+D:\Java project\FSB\src\main\java\org\example\model\properties\ServerProperties.java
