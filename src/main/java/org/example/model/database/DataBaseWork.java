@@ -16,7 +16,6 @@ import org.example.data.mydata.DLogin;
 
 import java.util.Objects;
 
-
 public class DataBaseWork implements IDataBaseWork {
 
     //@PersistenceUnit(unitName = "FSBJDBC_PersistenceUnit")

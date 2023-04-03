@@ -15,6 +15,7 @@ import org.example.data.mydata.DExcel;
 import org.example.data.mydata.DFile;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.properties.ServerProperties;
+import org.example.model.workingFiles.IWorkingFiles;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -27,6 +28,9 @@ public class Doc implements IDoc{
 
     @Inject
     private IDataBaseWork DataBaseWork;
+
+    @Inject
+    private IWorkingFiles workingFiles;
 
     @Override
     public Response loadDoc(String name){
@@ -90,7 +94,7 @@ public class Doc implements IDoc{
             }
 
             String doc_path = customDir.getCanonicalPath() + File.separator + doc_name;
-            if (! writeFile(ArrayUtils.toPrimitive(bytes.toArray(new Byte[0])), doc_path)) {
+            if (! workingFiles.writeFile(ArrayUtils.toPrimitive(bytes.toArray(new Byte[0])), doc_path)) {
                 Result.put("Msg", "File save error.");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -219,11 +223,13 @@ public class Doc implements IDoc{
     private DExcel excelParser(String fileName, int start, int number){
 
         if (start < 1)
-            return new DExcel("Start cannot be less than 1");
+            start = 1;
+//            return new DExcel("Start cannot be less than 1");
 
 
         if (number < 1)
-            return new DExcel("Quantity cannot be less than 1");
+            number = 25;
+//            return new DExcel("Quantity cannot be less than 1");
 
         try {
             FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + fileName);
@@ -238,14 +244,13 @@ public class Doc implements IDoc{
 //
 //            }
 
-            int i = 1;
+            int i = 0;
             for (Row row : sheet) {
-                if (i < start) {
-                    i++;
+                i++;
+                if (i < start)
                     continue;
-                }
 
-                if (i > start + number) break;
+                if (i > start + number - 1) break;
 
                 data.put(i, new ArrayList<>());
                 for (Cell cell : row) {
@@ -254,7 +259,6 @@ public class Doc implements IDoc{
                         case NUMERIC -> data.get(i).add(String.valueOf(cell.getNumericCellValue()));
                     }
                 }
-                i++;
             }
 
             file.close();
@@ -300,7 +304,7 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response readDoc(String doc_name, String userid) {
+    public Response readDoc(String doc_name, int start, int diapason, String userid) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -323,12 +327,12 @@ public class Doc implements IDoc{
             }
             String doc_path = customDir.getCanonicalPath() + File.separator + file.getFile_name();
 
-            if (! writeFile(file.getFile_byte(), doc_path)) {
+            if (! workingFiles.writeFile(file.getFile_byte(), doc_path)) {
                 Result.put("Msg", "File save error.");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            Result.put("Data", jsonb.toJson(excelParser(file.getFile_name()).toJson()));
+            Result.put("Data", jsonb.toJson(excelParser(file.getFile_name(), start, diapason).toJson()));
             Result.put("Msg", "");
 
             return Response.ok(jsonb.toJson(Result)).build();
@@ -338,18 +342,5 @@ public class Doc implements IDoc{
         }
     }
 
-    private boolean writeFile(byte[] content, String filename) throws IOException {
-        //! Файл перезаписывается если он уже существует
 
-        File file = new File(filename);
-        if (!file.exists()) {
-            if (! file.createNewFile()) return false;
-        }
-        FileOutputStream fop = new FileOutputStream(file);
-        fop.write(content);
-        fop.flush();
-        fop.close();
-
-        return true;
-    }
 }

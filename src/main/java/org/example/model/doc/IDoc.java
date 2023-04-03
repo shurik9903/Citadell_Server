@@ -11,5 +11,5 @@ public interface IDoc {
 
     Response loadFile();
 
-    Response readDoc(String doc_name, String userid);
+    Response readDoc(String doc_name, int start, int diapason, String userid);
 }
