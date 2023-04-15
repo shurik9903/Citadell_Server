@@ -10,6 +10,9 @@ import java.io.Serializable;
 @Entity
 @Table(name = "\"users\"")
 public class ELogin implements Serializable{
+
+    private String msg = "";
+
     @Id
     @Column(name = "\"id\"")
     private Integer user_ID;
@@ -21,9 +24,14 @@ public class ELogin implements Serializable{
     private String user_password;
 
     @Column(name = "\"permission\"")
-    private String user_permission;
+    private boolean permission;
 
     public ELogin(){}
+
+    public ELogin(String msg){
+        System.out.println("myqwe" + msg);
+        this.msg = msg;
+    }
 
     public ELogin(String Login, String Password){
 
@@ -32,19 +40,17 @@ public class ELogin implements Serializable{
     }
 
     public ELogin(int ID, String UserLogin){
-
         this.user_ID = ID;
         this.user_login = UserLogin;
     }
 
-    public String getUser_permission() {
-        return user_permission;
+    public boolean isPermission() {
+        return permission;
     }
 
-    public void setUser_permission(String user_permission) {
-        this.user_permission = user_permission;
+    public void setPermission(boolean permission) {
+        this.permission = permission;
     }
-
 
     public Integer getUser_ID() {
         return user_ID;
@@ -68,5 +74,13 @@ public class ELogin implements Serializable{
 
     public void setUser_login(String user_login) {
         this.user_login = user_login;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 }

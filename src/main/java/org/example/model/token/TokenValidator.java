@@ -1,25 +1,28 @@
 package org.example.model.token;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.Jwts;
+
+import java.security.Key;
 
 
 public class TokenValidator implements ITokenValidator{
 
-    private String key;
+    private Key key;
 
-    public TokenValidator(String lKey) {
-        key = lKey;
+    public TokenValidator(Key key) {
+        this.key = key;
     }
 
     @Override
-    public String validate(String token) throws Exception {
-
-        try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(key).parseClaimsJws(token);
-            return claims.getBody().getSubject();
-        } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException e) {
-            throw new Exception("Invalid JWT");
-        }
+    public String validate(String token){
+        Jws<Claims> claims = Jwts
+                .parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
+        return claims.getBody().getSubject();
     }
 
 }

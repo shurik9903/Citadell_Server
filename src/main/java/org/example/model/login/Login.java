@@ -4,12 +4,9 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
-import org.example.data.mydata.DLogin;
+import org.example.data.entity.ELogin;
 import org.example.model.database.IDataBaseWork;
-import org.example.model.token.ITokenIssuer;
-import org.example.model.token.ITokenKey;
-import org.example.model.token.TokenIssuer;
-import org.example.model.token.TokenKey;
+import org.example.model.token.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,59 +14,52 @@ import java.util.Map;
 public class Login implements ILogin {
 
     @Inject
+    private IToken token;
+
+    @Inject
     private IDataBaseWork DataBaseWork;
 
     @Override
-    public Response LoginFunc(String login, String password) {
+    public Response LoginFunc(String jsonData) {
+
+        Jsonb jsonb = JsonbBuilder.create();
+
+        Map<String, String> dLogin = new HashMap<>();
+        dLogin = jsonb.fromJson(jsonData, dLogin.getClass());
+
+        String login = dLogin.getOrDefault("login", null);
+        String password = dLogin.getOrDefault("password", null);
+
 
         Map<String, String> Result = new HashMap<>();
 
-        String Checklogin = "qqw";
-        String Checkpassword = "3331";
-
         try {
 
-            if (!login.isEmpty() && !password.isEmpty()) {
+            if (login.isEmpty() || password.isEmpty()) {
+                Result.put("Msg", "Fill in all the fields");
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
 
-                if (DataBaseWork.ping()) {
+            if (!DataBaseWork.ping()) {
+                Result.put("Msg", "Wrong login or password");
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
 
-                    DLogin dlogin = (DLogin) DataBaseWork.login(login, password);
+            ELogin eLogin = DataBaseWork.login(login, password);
 
-                    if (dlogin.getMsg() == null) {
+            if (eLogin.getMsg() != null) {
+                Result.put("Msg", eLogin.getMsg());
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
 
-                        ITokenKey tokenKey = new TokenKey();
-                        ITokenIssuer tokenIssuer = new TokenIssuer(tokenKey.getKey());
-                        String newToken = tokenIssuer.issueToken(login);
+            String newToken = token.create(login, String.valueOf(eLogin.isPermission()), eLogin.getUser_ID().toString());
 
-                        if (!newToken.isEmpty()) {
-                            Result.put("Token", newToken);
-                            Result.put("UserID", String.valueOf(dlogin.getUser_ID()));
-                            Result.put("UserLogin", dlogin.getUser_login());}else
-                            Result.put("Msg", "Token Error1");
-                    } else Result.put("Msg", dlogin.getMsg());
-
-
-                } else if (login.equals(Checklogin) && password.equals(Checkpassword)){
-
-                    ITokenKey tokenKey = new TokenKey();
-                    ITokenIssuer tokenIssuer = new TokenIssuer(tokenKey.getKey());
-                    String newToken = tokenIssuer.issueToken(login);
-
-                    if (!newToken.isEmpty()) {
-                        Result.put("Token", newToken);
-                        Result.put("UserID", String.valueOf(-1));
-                        Result.put("UserLogin", login);
-                    }else
-                        Result.put("Msg", "Token Error2");
-                } else Result.put("Msg", "Wrong login or password");
-
-            } else Result.put("Msg", "Fill in all the fields");
-
-            Jsonb jsonb = JsonbBuilder.create();
+            Result.put("token", newToken);
+            Result.put("login", login);
 
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
-            System.out.println(e);
+            System.out.println(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity("Error: " + e.getMessage()).build();
         }
     }

@@ -5,7 +5,7 @@ import jakarta.ws.rs.core.Response;
 public interface IDoc {
     Response loadDoc(String name);
 
-    Response saveFile(String document);
+    Response saveFile(String document, String userID);
 
     Response overwriteFile(String doc_name, String userid);
 

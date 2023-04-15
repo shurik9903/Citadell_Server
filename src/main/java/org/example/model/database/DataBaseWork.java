@@ -11,8 +11,6 @@ import jakarta.transaction.UserTransaction;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.example.data.entity.EFile;
 import org.example.data.entity.ELogin;
-import org.example.data.mydata.DFile;
-import org.example.data.mydata.DLogin;
 
 import java.util.Objects;
 
@@ -30,13 +28,13 @@ public class DataBaseWork implements IDataBaseWork {
     private UserTransaction Transaction;
 
     @Override
-    public Object login(String login, String password) {
+    public ELogin login(String login, String password) {
         EntityManager entityManager = null;
         try {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return new DLogin("Error while Entity Manager initializing", -1, null);
+                return new ELogin("Error while Entity Manager initializing");
             }
 
             Transaction.begin();
@@ -47,20 +45,19 @@ public class DataBaseWork implements IDataBaseWork {
             query.setParameter(1, login)
                     .setParameter(2, password);
 
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+                return new ELogin("Invalid username / mail or password");
+            }
 
-            DLogin dlogin = null;
-
-            try {
-                dlogin  = new DLogin((ELogin) query.getSingleResult());
-            } catch (Exception ignored) {}
-
+            ELogin eLogin = (ELogin) query.getSingleResult();
             Transaction.commit();
 
-            return Objects.requireNonNullElseGet(dlogin, () -> new DLogin("Invalid username / mail or password", -1, null));
+            return eLogin;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new DLogin("Failed to connect to server.", -1, null);
+            return new ELogin("Failed to connect to server.");
         } finally {
             assert entityManager != null;
             entityManager.close();
@@ -155,13 +152,13 @@ public class DataBaseWork implements IDataBaseWork {
     }
 
     @Override
-    public DFile loadFile(String fileName, String userID){
+    public EFile loadFile(String fileName, String userID){
         EntityManager entityManager = null;
         try {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return new DFile("Error while Entity Manager initializing");
+                return new EFile("Error while Entity Manager initializing");
             }
 
             Transaction.begin();
@@ -172,19 +169,20 @@ public class DataBaseWork implements IDataBaseWork {
             query.setParameter(1, fileName)
                     .setParameter(2, userID);
 
-            DFile dFile = null;
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+                return new EFile("No file with that name was found.");
+            }
 
-            try {
-                dFile  = new DFile((EFile) query.getSingleResult());
-            } catch (Exception ignored) {}
+            EFile eFile = (EFile) query.getSingleResult();
 
             Transaction.commit();
-            return Objects.requireNonNullElseGet(dFile, () -> new DFile("Invalid username / mail or password"));
+            return eFile;
 
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new DFile("Error: " + e.getMessage());
+            return new EFile("Error: " + e.getMessage());
         } finally {
             assert entityManager != null;
             entityManager.close();

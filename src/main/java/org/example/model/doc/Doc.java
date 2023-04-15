@@ -11,8 +11,8 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.data.entity.EFile;
 import org.example.data.mydata.DExcel;
-import org.example.data.mydata.DFile;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.properties.ServerProperties;
 import org.example.model.workingFiles.IWorkingFiles;
@@ -54,7 +54,7 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response saveFile(String document){
+    public Response saveFile(String document, String userID){
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -63,7 +63,6 @@ public class Doc implements IDoc{
 
         String doc_name  = docData.getOrDefault("doc_name", "");
         String doc_bytes  = docData.getOrDefault("doc_bytes", "");
-        String userid = docData.getOrDefault("userid", "");
 
         if (! (doc_name.endsWith(".xlsx")
                 || doc_name.endsWith(".xlsm")
@@ -148,7 +147,7 @@ public class Doc implements IDoc{
             FileInputStream input = new FileInputStream(fileDownload);
 
             MutableBoolean replace = new MutableBoolean(false);
-            Result.put("Msg", DataBaseWork.saveFile(doc_name, input.readAllBytes(), userid, replace));
+            Result.put("Msg", DataBaseWork.saveFile(doc_name, input.readAllBytes(), userID, replace));
             Result.put("Replace", replace.toString());
             return Response.ok(jsonb.toJson(Result)).build();
 
@@ -314,9 +313,9 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            DFile file = DataBaseWork.loadFile(doc_name, userid);
-            if (!file.getMsg().equals("")) {
-                Result.put("Msg", file.getMsg());
+            EFile eFile = DataBaseWork.loadFile(doc_name, userid);
+            if (eFile.getMsg() != null) {
+                Result.put("Msg", eFile.getMsg());
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -325,14 +324,14 @@ public class Doc implements IDoc{
             if (!customDir.exists()) {
                 customDir.mkdir();
             }
-            String doc_path = customDir.getCanonicalPath() + File.separator + file.getFile_name();
+            String doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
 
-            if (! workingFiles.writeFile(file.getFile_byte(), doc_path)) {
+            if (! workingFiles.writeFile(eFile.getFile_byte(), doc_path)) {
                 Result.put("Msg", "File save error.");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            Result.put("Data", jsonb.toJson(excelParser(file.getFile_name(), start, diapason).toJson()));
+            Result.put("Data", jsonb.toJson(excelParser(eFile.getFile_name(), start, diapason).toJson()));
             Result.put("Msg", "");
 
             return Response.ok(jsonb.toJson(Result)).build();

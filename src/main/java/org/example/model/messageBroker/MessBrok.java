@@ -132,6 +132,7 @@ public class MessBrok implements IMessBrok {
     @Inject
     IRabbit rabbit;
 
+    //Создание канала обмена
     @Override
     public Response declare(String json){
 
@@ -188,6 +189,7 @@ public class MessBrok implements IMessBrok {
 
     }
 
+    //Отправка сообщения
     @Override
     public Response send(String json){
         Jsonb jsonb = JsonbBuilder.create();
@@ -227,6 +229,7 @@ public class MessBrok implements IMessBrok {
         }
     }
 
+    //Подписаться на получение сообщения
     @Override
     public Response consume(){
 
