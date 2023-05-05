@@ -1,3 +1,4 @@
+org\example\controller\WebSocket\WebSocket$1.class
 org\example\model\login\ILogin.class
 org\example\model\database\IDataBaseWork.class
 org\example\controller\Filter\RestResponseFilter.class
@@ -18,9 +19,11 @@ org\example\model\dictionary\Dictionary.class
 org\example\model\doc\Doc$1.class
 org\example\controller\WebSocket\WebSocket.class
 org\example\controller\Filter\RestAuthorizedFilter.class
+org\example\controller\WebSocket\Message\InMessage.class
 org\example\model\workingFiles\WorkingFiles.class
 org\example\model\rabbit\IRabbit.class
 org\example\model\token\TokenRequired.class
+org\example\controller\WebSocket\Message\OutMessage.class
 org\example\controller\API\AnalysisController.class
 org\example\model\workingFiles\IWorkingFiles.class
 org\example\model\dictionary\IDictionary.class
@@ -32,6 +35,7 @@ org\example\model\token\Token.class
 org\example\model\token\IToken.class
 org\example\model\token\ITokenValidator.class
 org\example\model\token\TokenValidator.class
+org\example\data\entity\ENameFiles.class
 org\example\model\analysis\Analysis.class
 org\example\model\doc\IDoc.class
 org\example\model\properties\ServerProperties.class
@@ -40,4 +44,3 @@ org\example\model\rabbit\Rabbit.class
 org\example\model\token\ITokenKey.class
 org\example\controller\API\DocController.class
 org\example\controller\API\Ping.class
-org\example\controller\WebSocket\Message\Message.class

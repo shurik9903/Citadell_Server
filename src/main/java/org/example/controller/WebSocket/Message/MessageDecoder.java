@@ -5,13 +5,13 @@ import jakarta.json.bind.JsonbBuilder;
 import jakarta.websocket.DecodeException;
 import jakarta.websocket.Decoder;
 
-public class MessageDecoder implements Decoder.Text<Message> {
+public class MessageDecoder implements Decoder.Text<InMessage> {
 
     private static final Jsonb jsonb = JsonbBuilder.create();
 
     @Override
-    public Message decode(String json) throws DecodeException {
-        return jsonb.fromJson(json, Message.class);
+    public InMessage decode(String json) throws DecodeException {
+        return jsonb.fromJson(json, InMessage.class);
     }
 
     @Override

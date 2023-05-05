@@ -9,10 +9,12 @@ import jakarta.persistence.Query;
 import jakarta.transaction.UserTransaction;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.entity.ELogin;
 
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DataBaseWork implements IDataBaseWork {
 
@@ -145,6 +147,46 @@ public class DataBaseWork implements IDataBaseWork {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return "Error: " + e.getMessage();
+        } finally {
+            assert entityManager != null;
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public ArrayList<ENameFiles> allFiles(String userID, StringBuilder msg){
+        EntityManager entityManager = null;
+        try {
+            try {
+                entityManager = EMF.createEntityManager();
+            } catch (Exception e) {
+                msg.append("Error while Entity Manager initializing");
+                return null;
+            }
+
+            Transaction.begin();
+            entityManager.joinTransaction();
+
+            Query query = entityManager.createNativeQuery("Select * from user_tables where userid = ?", ENameFiles.class);
+            query.setParameter(1, userID);
+
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+
+                msg.append("No file with that name was found.");
+                return null;
+            }
+
+            List<ENameFiles> eFile = query.getResultList();
+
+            Transaction.commit();
+            return new ArrayList<>(eFile);
+
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            msg.append("Error: " + e.getMessage());
+            return null;
         } finally {
             assert entityManager != null;
             entityManager.close();

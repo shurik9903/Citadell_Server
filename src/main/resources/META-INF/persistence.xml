@@ -7,6 +7,7 @@ http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
    <jta-data-source>jdbc/FSBJDBC</jta-data-source>
       <class>org.example.data.entity.ELogin</class>
       <class>org.example.data.entity.EFile</class>
+      <class>org.example.data.entity.ENameFiles</class>
   </persistence-unit>
 
 </persistence>

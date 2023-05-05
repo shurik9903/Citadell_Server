@@ -33,10 +33,16 @@ public class DocController {
 //    }
 
     @GET
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     @TokenRequired
     public Response doGet(@QueryParam("name") String fileName, @QueryParam("start") int start, @QueryParam("diapason") int diapason, @HeaderParam("X-Authentication-decrypted") String userID) {
         try {
+
+            System.out.println("Testing " + fileName + " " + start + " " + diapason);
+
+            if (fileName == null && start == 0 && diapason == 0){
+                return doc.allDocs(userID);
+            }
 
             if (fileName == null || fileName.isEmpty()){
                 return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + "Filename cannot be empty").build();
@@ -51,7 +57,7 @@ public class DocController {
 
     @POST
     @Consumes("application/json")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     @TokenRequired
     public Response doPost(String document, @HeaderParam("X-Authentication-decrypted") String userID) {
         try {
@@ -62,7 +68,7 @@ public class DocController {
     }
 
     @PUT
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     @TokenRequired
     public Response doPut(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID) {
         try {

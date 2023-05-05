@@ -11,6 +11,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.mydata.DExcel;
 import org.example.model.database.IDataBaseWork;
@@ -19,8 +20,6 @@ import org.example.model.workingFiles.IWorkingFiles;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -44,6 +43,8 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
+
+
             Result.put("Msg", "");
             return Response.ok(jsonb.toJson(Result)).build();
 
@@ -51,6 +52,39 @@ public class Doc implements IDoc{
             System.out.println(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
         }
+    }
+
+    @Override
+    public Response allDocs(String userID) {
+
+        Jsonb jsonb = JsonbBuilder.create();
+
+
+
+        Map<String, String> Result = new HashMap<>();
+
+        try {
+            if (!DataBaseWork.ping()) {
+                Result.put("Msg", "No connection to server.");
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
+
+            StringBuilder msg = new StringBuilder();
+            ArrayList<ENameFiles> eNameFiles = DataBaseWork.allFiles(userID, msg);
+
+            if (!msg.isEmpty()){
+                Result.put("Msg", "");
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
+
+            Result.put("Files", jsonb.toJson(eNameFiles));
+            return Response.ok(jsonb.toJson(Result)).build();
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+        }
+
     }
 
     @Override
@@ -196,8 +230,8 @@ public class Doc implements IDoc{
                 loadInt.add(Byte.toUnsignedInt(b));
             }
 
-            Result.put("fileName", fileDownload.getName());
-            Result.put("fileBytes", loadInt.toString());
+            Result.put("file_name", fileDownload.getName());
+            Result.put("file_byte", loadInt.toString());
 
         } catch (Exception e){
             System.out.println("File upload error: " + e.getMessage());

@@ -13,7 +13,7 @@ public class RabbitController {
 
     //Подписаться
     @GET
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response doGet() {
         try {
             return messBrok.consume();
@@ -26,7 +26,7 @@ public class RabbitController {
     //Объявить
     @POST
     @Consumes("application/json")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response doPost(String json) {
         try {
             return messBrok.declare(json);
@@ -38,7 +38,7 @@ public class RabbitController {
 
     //Отправить сообщение
     @PUT
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response doPut(String json, @HeaderParam("Token") String UserToken) {
         try {
             return messBrok.send(json);

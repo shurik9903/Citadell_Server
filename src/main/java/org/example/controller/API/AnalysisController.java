@@ -14,7 +14,7 @@ public class AnalysisController {
 
     @GET
     @Path("{docid:.*}")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     @TokenRequired
     public Response doGet(@PathParam("docid") String docid) {
         try {

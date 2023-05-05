@@ -13,7 +13,7 @@ public class LoginController {
 
     @POST
     @Consumes("application/json")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response doPost(String jsonData) {
         try {
             return log.LoginFunc(jsonData);

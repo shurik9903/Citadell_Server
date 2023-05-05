@@ -7,7 +7,7 @@ import jakarta.ws.rs.core.Response;
 public class Ping {
 
     @GET
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     public Response doGet() {
         try {
             return Response.ok("OK").build();

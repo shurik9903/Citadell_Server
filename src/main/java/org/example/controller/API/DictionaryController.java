@@ -15,7 +15,7 @@ public class DictionaryController {
 
     @GET
     @Path("{word:.*}")
-    @Produces("application/json")
+    @Produces("application/json; charset=UTF-8")
     @TokenRequired
     public Response doGet(@PathParam("word") String word) {
         try {

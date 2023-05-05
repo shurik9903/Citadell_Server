@@ -2,6 +2,7 @@ package org.example.model.token;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import jakarta.ws.rs.NotAuthorizedException;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -18,28 +19,36 @@ public class Token implements IToken {
 
     @Override
     public Map<String, String> getData(String token){
-        ITokenKey tokenKey = new TokenKey();
-        ITokenValidator tokenValidator = new TokenValidator(tokenKey.getKey());
+        try {
+            ITokenKey tokenKey = new TokenKey();
+            ITokenValidator tokenValidator = new TokenValidator(tokenKey.getKey());
 
-        Jsonb jsonb = JsonbBuilder.create();
-        Map<String, String> dBody = new HashMap<>();
-        return (Map<String, String>) jsonb.fromJson(tokenValidator.validate(token), dBody.getClass());
+            Jsonb jsonb = JsonbBuilder.create();
+
+            return (Map<String, String>) jsonb.fromJson(tokenValidator.validate(token), new HashMap<String, String>().getClass());
+        }catch (Exception e){
+            throw new NotAuthorizedException("Invalid Token");
+        }
     }
 
     @Override
     public boolean check(String login, String token, boolean admin) throws NoSuchAlgorithmException {
-        ITokenKey tokenKey = new TokenKey();
-        ITokenValidator tokenValidator = new TokenValidator(tokenKey.getKey());
+        try {
+            ITokenKey tokenKey = new TokenKey();
+            ITokenValidator tokenValidator = new TokenValidator(tokenKey.getKey());
 
-        Jsonb jsonb = JsonbBuilder.create();
-        Map<String, String> dBody = new HashMap<>();
-        dBody = (Map<String, String>) jsonb.fromJson(tokenValidator.validate(token), dBody.getClass());
+            Jsonb jsonb = JsonbBuilder.create();
+            Map<String, String> dBody = new HashMap<>();
+            dBody = (Map<String, String>) jsonb.fromJson(tokenValidator.validate(token), dBody.getClass());
 
-        if (admin)
-            return login.equals(dBody.getOrDefault("login", ""))
-                    && String.valueOf(true).equals(dBody.getOrDefault("admin", ""));
+            if (admin)
+                return login.equals(dBody.getOrDefault("login", ""))
+                        && String.valueOf(true).equals(dBody.getOrDefault("admin", ""));
 
-        return login.equals(dBody.getOrDefault("login", ""));
+            return login.equals(dBody.getOrDefault("login", ""));
+        }catch (Exception e){
+            throw new NotAuthorizedException("Invalid Token");
+        }
     }
 
 }

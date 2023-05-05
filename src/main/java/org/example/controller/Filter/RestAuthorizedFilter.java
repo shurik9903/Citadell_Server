@@ -49,6 +49,8 @@ public class RestAuthorizedFilter implements ContainerRequestFilter {
                 throw new NotAuthorizedException("Invalid Token");;
         } catch (NoSuchAlgorithmException e) {
             throw new NotAuthorizedException("Invalid Token");
+        } catch (Exception e) {
+            System.out.println("Error " + e.getMessage());
         }
     }
 }

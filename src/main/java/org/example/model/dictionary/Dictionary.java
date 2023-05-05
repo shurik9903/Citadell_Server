@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
+import org.example.controller.WebSocket.WebSocket;
 import org.example.model.database.IDataBaseWork;
 
 
@@ -25,6 +26,7 @@ public class Dictionary implements IDictionary {
                 Result.put("Msg", "Not connection to server..");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
+
 
 
             Result.put("Msg", "");
