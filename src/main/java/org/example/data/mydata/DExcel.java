@@ -10,7 +10,8 @@ import java.util.Map;
 public class DExcel {
 
     private Integer rowNumber = 0;
-    private Map<Integer, ArrayList<String>> data = null;
+    private Map<Integer, ArrayList<String>> rows = null;
+    private ArrayList<String> title = null;
     private String Msg = "";
 
     public DExcel(){}
@@ -19,9 +20,18 @@ public class DExcel {
         this.Msg = Msg;
     }
 
-    public DExcel(Integer rowNumber, Map<Integer, ArrayList<String>> data){
+    public DExcel(Integer rowNumber, Map<Integer, ArrayList<String>> rows, ArrayList<String> title){
         this.rowNumber = rowNumber;
-        this.data = data;
+        this.rows = rows;
+        this.title = title;
+    }
+
+    public ArrayList<String> getTitle() {
+        return title;
+    }
+
+    public void setTitle(ArrayList<String> title) {
+        this.title = title;
     }
 
     public Integer getRowNumber() {
@@ -32,12 +42,12 @@ public class DExcel {
         this.rowNumber = rowNumber;
     }
 
-    public Map<Integer, ArrayList<String>> getData() {
-        return data;
+    public Map<Integer, ArrayList<String>> getRows() {
+        return rows;
     }
 
-    public void setData(Map<Integer, ArrayList<String>> data) {
-        this.data = data;
+    public void setRows(Map<Integer, ArrayList<String>> rows) {
+        this.rows = rows;
     }
 
     public String getMsg() {
@@ -53,7 +63,8 @@ public class DExcel {
         Map<String, String> json = new HashMap<>();
 
         json.put("RowNumber", rowNumber.toString());
-        json.put("Rows", jsonb.toJson(data));
+        json.put("Rows", jsonb.toJson(rows));
+        json.put("Title", jsonb.toJson(title));
 
         return json;
     }

@@ -270,7 +270,8 @@ public class Doc implements IDoc{
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            Map<Integer, ArrayList<String>> data = new HashMap<>();
+            Map<Integer, ArrayList<String>> rows = new HashMap<>();
+            ArrayList<String> title = new ArrayList<>();
 
 //            for (int i = start; i <= sheet.getPhysicalNumberOfRows() && i <= start + number; i++){
 //                sheet.getRow(i);
@@ -285,18 +286,27 @@ public class Doc implements IDoc{
 
                 if (i > start + number - 1) break;
 
-                data.put(i, new ArrayList<>());
-                for (Cell cell : row) {
-                    switch (cell.getCellType()) {
-                        case STRING -> data.get(i).add(cell.getStringCellValue());
-                        case NUMERIC -> data.get(i).add(String.valueOf(cell.getNumericCellValue()));
+                if (i == 1) {
+                    for (Cell cell : row) {
+                        switch (cell.getCellType()) {
+                            case STRING -> title.add(cell.getStringCellValue());
+                            case NUMERIC -> title.add(String.valueOf(cell.getNumericCellValue()));
+                        }
+                    }
+                } else {
+                    rows.put(i, new ArrayList<>());
+                    for (Cell cell : row) {
+                        switch (cell.getCellType()) {
+                            case STRING -> rows.get(i).add(cell.getStringCellValue());
+                            case NUMERIC -> rows.get(i).add(String.valueOf(cell.getNumericCellValue()));
+                        }
                     }
                 }
             }
 
             file.close();
 
-            return new DExcel(sheet.getPhysicalNumberOfRows(), data);
+            return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
 
         }catch (Exception e){
             System.out.println("Excel Parser Error: " + e.getMessage());
@@ -312,15 +322,26 @@ public class Doc implements IDoc{
 
             Sheet sheet = workbook.getSheetAt(0);
 
-            Map<Integer, ArrayList<String>> data = new HashMap<>();
+            Map<Integer, ArrayList<String>> rows = new HashMap<>();
+            ArrayList<String> title = new ArrayList<>();
 
             int i = 1;
             for (Row row : sheet) {
-                data.put(i, new ArrayList<>());
-                for (Cell cell : row) {
-                    switch (cell.getCellType()) {
-                        case STRING -> data.get(i).add(cell.getStringCellValue());
-                        case NUMERIC -> data.get(i).add(String.valueOf(cell.getNumericCellValue()));
+
+                if (i == 1) {
+                    for (Cell cell : row) {
+                        switch (cell.getCellType()) {
+                            case STRING -> title.add(cell.getStringCellValue());
+                            case NUMERIC -> title.add(String.valueOf(cell.getNumericCellValue()));
+                        }
+                    }
+                } else {
+                    rows.put(i, new ArrayList<>());
+                    for (Cell cell : row) {
+                        switch (cell.getCellType()) {
+                            case STRING -> rows.get(i).add(cell.getStringCellValue());
+                            case NUMERIC -> rows.get(i).add(String.valueOf(cell.getNumericCellValue()));
+                        }
                     }
                 }
                 i++;
@@ -328,7 +349,7 @@ public class Doc implements IDoc{
 
             file.close();
 
-            return new DExcel(sheet.getPhysicalNumberOfRows(), data);
+            return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
 
         }catch (Exception e){
             System.out.println("Excel Parser Error: " + e.getMessage());
