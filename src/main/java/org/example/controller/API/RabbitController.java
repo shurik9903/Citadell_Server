@@ -18,8 +18,8 @@ public class RabbitController {
         try {
             return messBrok.consume();
         } catch (Exception e) {
-            System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            System.out.println("|Ошибка: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -31,8 +31,8 @@ public class RabbitController {
         try {
             return messBrok.declare(json);
         } catch (Exception e) {
-            System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            System.out.println("|Ошибка: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -43,8 +43,8 @@ public class RabbitController {
         try {
             return messBrok.send(json);
         } catch (Exception e) {
-            System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            System.out.println("|Ошибка: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 }

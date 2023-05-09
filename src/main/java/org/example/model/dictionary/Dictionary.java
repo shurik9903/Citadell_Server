@@ -23,7 +23,7 @@ public class Dictionary implements IDictionary {
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server..");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -34,7 +34,7 @@ public class Dictionary implements IDictionary {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
 
     }

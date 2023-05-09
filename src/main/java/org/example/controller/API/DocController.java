@@ -45,13 +45,13 @@ public class DocController {
             }
 
             if (fileName == null || fileName.isEmpty()){
-                return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + "Filename cannot be empty").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + "Имя файла не может быть пустым").build();
             }
 
             return doc.readDoc(fileName, start, diapason, userID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -63,7 +63,7 @@ public class DocController {
         try {
             return doc.saveFile(document, userID);
         }catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -75,7 +75,7 @@ public class DocController {
             return doc.overwriteFile(fileName, userID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 

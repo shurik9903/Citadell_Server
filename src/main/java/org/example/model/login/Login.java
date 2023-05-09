@@ -36,12 +36,12 @@ public class Login implements ILogin {
         try {
 
             if (login.isEmpty() || password.isEmpty()) {
-                Result.put("Msg", "Fill in all the fields");
+                Result.put("Msg", "Заполните все поля");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Wrong login or password");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -60,7 +60,7 @@ public class Login implements ILogin {
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка: " + e.getMessage()).build();
         }
     }
 

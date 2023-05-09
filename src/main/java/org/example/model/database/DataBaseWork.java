@@ -36,7 +36,7 @@ public class DataBaseWork implements IDataBaseWork {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return new ELogin("Error while Entity Manager initializing");
+                return new ELogin("Ошибка при инициализации Entity Manager");
             }
 
             Transaction.begin();
@@ -49,7 +49,7 @@ public class DataBaseWork implements IDataBaseWork {
 
             if (query.getResultList().size() == 0) {
                 Transaction.commit();
-                return new ELogin("Invalid username / mail or password");
+                return new ELogin("Неверный логин или пароль");
             }
 
             ELogin eLogin = (ELogin) query.getSingleResult();
@@ -59,7 +59,7 @@ public class DataBaseWork implements IDataBaseWork {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new ELogin("Failed to connect to server.");
+            return new ELogin("Нет соединения с базой данных");
         } finally {
             assert entityManager != null;
             entityManager.close();
@@ -73,7 +73,7 @@ public class DataBaseWork implements IDataBaseWork {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return "Error while Entity Manager initializing";
+                return "Ошибка при инициализации Entity Manager";
             }
 
             Transaction.begin();
@@ -102,7 +102,7 @@ public class DataBaseWork implements IDataBaseWork {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return "Error: " + e.getMessage();
+            return "Ошибка: " + e.getMessage();
         } finally {
             assert entityManager != null;
             entityManager.close();
@@ -111,12 +111,14 @@ public class DataBaseWork implements IDataBaseWork {
 
     @Override
     public String overwriteFile(String fileName, byte[] fileByte, String userID){
+
+
         EntityManager entityManager = null;
         try {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return "Error while Entity Manager initializing";
+                return "Ошибка при инициализации Entity Manager";
             }
 
             Transaction.begin();
@@ -129,7 +131,7 @@ public class DataBaseWork implements IDataBaseWork {
 
             if (query.getResultList().size() == 0) {
                 Transaction.commit();
-                return "No file with that name was found.";
+                return "Файл с таким именем не найден";
             }
 
             EFile eFile = (EFile) query.getSingleResult();
@@ -146,7 +148,7 @@ public class DataBaseWork implements IDataBaseWork {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return "Error: " + e.getMessage();
+            return "Ошибка: " + e.getMessage();
         } finally {
             assert entityManager != null;
             entityManager.close();
@@ -160,7 +162,7 @@ public class DataBaseWork implements IDataBaseWork {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                msg.append("Error while Entity Manager initializing");
+                msg.append("Ошибка при инициализации Entity Manager");
                 return null;
             }
 
@@ -173,7 +175,7 @@ public class DataBaseWork implements IDataBaseWork {
             if (query.getResultList().size() == 0) {
                 Transaction.commit();
 
-                msg.append("No file with that name was found.");
+                msg.append("Файл с таким именем не найден");
                 return null;
             }
 
@@ -185,7 +187,7 @@ public class DataBaseWork implements IDataBaseWork {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            msg.append("Error: " + e.getMessage());
+            msg.append("Ошибка: " + e.getMessage());
             return null;
         } finally {
             assert entityManager != null;
@@ -195,12 +197,16 @@ public class DataBaseWork implements IDataBaseWork {
 
     @Override
     public EFile loadFile(String fileName, String userID){
+
+        System.out.println("test " + fileName);
+
+
         EntityManager entityManager = null;
         try {
             try {
                 entityManager = EMF.createEntityManager();
             } catch (Exception e) {
-                return new EFile("Error while Entity Manager initializing");
+                return new EFile("Ошибка при инициализации Entity Manager");
             }
 
             Transaction.begin();
@@ -213,7 +219,7 @@ public class DataBaseWork implements IDataBaseWork {
 
             if (query.getResultList().size() == 0) {
                 Transaction.commit();
-                return new EFile("No file with that name was found.");
+                return new EFile("Файл с таким именем не найден");
             }
 
             EFile eFile = (EFile) query.getSingleResult();
@@ -224,7 +230,7 @@ public class DataBaseWork implements IDataBaseWork {
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return new EFile("Error: " + e.getMessage());
+            return new EFile("Ошибка " + e.getMessage());
         } finally {
             assert entityManager != null;
             entityManager.close();

@@ -30,7 +30,7 @@ public class WebSocket {
         try {
             session.getBasicRemote().sendObject(outMessage);
         } catch (Exception e){
-            System.out.println("WebSocket Open error: " + e.getMessage());
+            System.out.println("Ошибка при открытии WebSocket: " + e.getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ public class WebSocket {
             try {
                 sess.getBasicRemote().sendObject(outMessage);
             } catch (Exception e) {
-                System.out.println("WebSocket Message error: " + e.getMessage());
+                System.out.println("Ошибка сообщений WebSocket: " + e.getMessage());
             }
         }
     }
@@ -70,15 +70,13 @@ public class WebSocket {
                         try {
                             sess.getBasicRemote().sendObject(outMessage);
                         } catch (Exception e) {
-                            System.out.println("WebSocket Message error: " + e.getMessage());
+                            System.out.println("Ошибка сообщений WebSocket: " + e.getMessage());
                         }
                     }
 
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-
-                System.out.println("Hello, World!");
             }
         };
 

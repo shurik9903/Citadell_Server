@@ -46,11 +46,11 @@ public class RestAuthorizedFilter implements ContainerRequestFilter {
 
         try {
             if (!token.check(getLogin, getToken, admin))
-                throw new NotAuthorizedException("Invalid Token");;
+                throw new NotAuthorizedException("Недействительный токен");;
         } catch (NoSuchAlgorithmException e) {
-            throw new NotAuthorizedException("Invalid Token");
+            throw new NotAuthorizedException("Недействительный токен");
         } catch (Exception e) {
-            System.out.println("Error " + e.getMessage());
+            System.out.println("Ошибка " + e.getMessage());
         }
     }
 }

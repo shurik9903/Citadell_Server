@@ -21,8 +21,8 @@ public class DictionaryController {
         try {
             return dictionary.loadWord(word);
         } catch (Exception e) {
-            System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            System.out.println("|Ошибка: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 }

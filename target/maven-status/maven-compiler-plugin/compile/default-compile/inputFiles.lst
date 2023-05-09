@@ -1,5 +1,6 @@
 D:\Java project\FSB\src\main\java\org\example\model\analysis\IAnalysis.java
 D:\Java project\FSB\src\main\java\org\example\model\dictionary\Dictionary.java
+D:\Java project\FSB\src\main\java\org\example\model\doc\docReader\DocXLS.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenKey.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenIssuer.java
 D:\Java project\FSB\src\main\java\org\example\data\entity\ENameFiles.java
@@ -24,10 +25,13 @@ D:\Java project\FSB\src\main\java\org\example\controller\Filter\RestResponseFilt
 D:\Java project\FSB\src\main\java\org\example\model\doc\Doc.java
 D:\Java project\FSB\src\main\java\org\example\model\database\DataBaseWork.java
 D:\Java project\FSB\src\main\java\org\example\model\token\TokenValidator.java
+D:\Java project\FSB\src\main\java\org\example\data\mydata\DDocXLS.java
+D:\Java project\FSB\src\main\java\org\example\model\doc\docReader\IDocReader.java
 D:\Java project\FSB\src\main\java\org\example\model\rabbit\IRabbit.java
 D:\Java project\FSB\src\main\java\org\example\model\analysis\Analysis.java
 D:\Java project\FSB\src\main\java\org\example\model\messageBroker\MessBrok.java
 D:\Java project\FSB\src\main\java\org\example\model\workingFiles\WorkingFiles.java
+D:\Java project\FSB\src\main\java\org\example\model\doc\docReader\DocReaderFactory.java
 D:\Java project\FSB\src\main\java\org\example\controller\WebSocket\Message\OutMessage.java
 D:\Java project\FSB\src\main\java\org\example\data\mydata\DExcel.java
 D:\Java project\FSB\src\main\java\org\example\controller\WebSocket\Message\InMessage.java

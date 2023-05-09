@@ -15,6 +15,8 @@ import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.mydata.DExcel;
 import org.example.model.database.IDataBaseWork;
+import org.example.model.doc.docReader.DocReaderFactory;
+import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
 import org.example.model.workingFiles.IWorkingFiles;
 
@@ -39,7 +41,7 @@ public class Doc implements IDoc{
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "No connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -50,7 +52,7 @@ public class Doc implements IDoc{
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -65,7 +67,7 @@ public class Doc implements IDoc{
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "No connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -82,112 +84,43 @@ public class Doc implements IDoc{
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
 
     }
 
     @Override
     public Response saveFile(String document, String userID){
+        try {
+
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
-        Map<String, String> docData = new HashMap<>();
-        docData = (Map<String,String>) jsonb.fromJson(document, docData.getClass());
+        Map<String, String> data = new HashMap<>();
+        data = (Map<String, String>) jsonb.fromJson(document, data.getClass());
 
-        String doc_name  = docData.getOrDefault("doc_name", "");
-        String doc_bytes  = docData.getOrDefault("doc_bytes", "");
+        String type = data.getOrDefault("type", null);
 
-        if (! (doc_name.endsWith(".xlsx")
-                || doc_name.endsWith(".xlsm")
-                || doc_name.endsWith(".xls"))
-        ) {
-            Result.put("Msg", "|Error: Unsupported file format. \nSupported formats .xlsx, .xlsm, .xlsm.");
-            return Response.ok(jsonb.toJson(Result)).build();
-        }
+        IDocReader docReader = DocReaderFactory.getDocReader(type);
 
-        try {
-            ArrayList<String> strBytes = new ArrayList<>(
-                    Arrays.asList(doc_bytes
-                            .replace("[","")
-                            .replace("]","")
-                            .replace(" ", "")
-                            .split(","))
-            );
+        docReader.setDoc(document);
 
-            ArrayList<Byte> bytes = new ArrayList<>();
-
-            for (String e : strBytes) {
-                bytes.add((byte) Integer.parseInt(e));
-            }
-
-            File customDir = new File(ServerProperties.getProperty("filepath"));
-            if (!customDir.exists()) {
-                customDir.mkdir();
-            }
-
-            String doc_path = customDir.getCanonicalPath() + File.separator + doc_name;
-            if (! workingFiles.writeFile(ArrayUtils.toPrimitive(bytes.toArray(new Byte[0])), doc_path)) {
-                Result.put("Msg", "File save error.");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
-
-        } catch (Exception e){
-            System.out.println("File save error: " + e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-        }
-
-//        try {
-//            File fileDownload = new File("..//test" + File.separator + "0e6b95c2b8eee44ccbd042dbefadfed2.jpg");
-//
-//            ArrayList<Integer> loadInt = new ArrayList<>();
-//
-//            for (Byte b: Files.readAllBytes(fileDownload.toPath())){
-//                loadInt.add(Byte.toUnsignedInt(b));
-//            }
-//
-//            Result.put("fileName", fileDownload.getName());
-//            Result.put("fileBytes", loadInt.toString());
-//
-//        } catch (Exception e){
-//            System.out.println("Error file load: " + e.getMessage());
-//            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-//        }
-
-
-        try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-//            ArrayList<String> strBytes = new ArrayList<>(
-//                    Arrays.asList(doc_bytes
-//                            .replace("[","")
-//                            .replace("]","")
-//                            .replace(" ", "")
-//                            .split(","))
-//            );
-//
-//            ArrayList<Byte> bytes = new ArrayList<>();
-//
-//            for (String e : strBytes) {
-//                bytes.add((byte) Integer.parseInt(e));
-//            }
-
-//            Result.put("Msg", DataBaseWork.saveFile(doc_name, ArrayUtils.toPrimitive(bytes.toArray(new Byte[0])), userid));
-
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + doc_name);
+            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + docReader.getFullName());
             FileInputStream input = new FileInputStream(fileDownload);
 
             MutableBoolean replace = new MutableBoolean(false);
-            Result.put("Msg", DataBaseWork.saveFile(doc_name, input.readAllBytes(), userID, replace));
+            Result.put("Msg", DataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
             Result.put("Replace", replace.toString());
             return Response.ok(jsonb.toJson(Result)).build();
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -199,7 +132,7 @@ public class Doc implements IDoc{
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -211,7 +144,7 @@ public class Doc implements IDoc{
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -234,13 +167,13 @@ public class Doc implements IDoc{
             Result.put("file_byte", loadInt.toString());
 
         } catch (Exception e){
-            System.out.println("File upload error: " + e.getMessage());
+            System.out.println("Ошибка при загрузке файла: " + e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
         }
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -309,7 +242,7 @@ public class Doc implements IDoc{
             return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
 
         }catch (Exception e){
-            System.out.println("Excel Parser Error: " + e.getMessage());
+            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
             return new DExcel("Error: " + e.getMessage());
         }
     }
@@ -352,7 +285,7 @@ public class Doc implements IDoc{
             return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
 
         }catch (Exception e){
-            System.out.println("Excel Parser Error: " + e.getMessage());
+            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
             return new DExcel("Error: " + e.getMessage());
         }
     }
@@ -364,7 +297,7 @@ public class Doc implements IDoc{
 
         try {
             if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Not connection to server.");
+                Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -382,7 +315,7 @@ public class Doc implements IDoc{
             String doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
 
             if (! workingFiles.writeFile(eFile.getFile_byte(), doc_path)) {
-                Result.put("Msg", "File save error.");
+                Result.put("Msg", "Ошибка при сохранении файла");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
@@ -392,7 +325,7 @@ public class Doc implements IDoc{
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 

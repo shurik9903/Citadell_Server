@@ -27,7 +27,7 @@ public class Token implements IToken {
 
             return (Map<String, String>) jsonb.fromJson(tokenValidator.validate(token), new HashMap<String, String>().getClass());
         }catch (Exception e){
-            throw new NotAuthorizedException("Invalid Token");
+            throw new NotAuthorizedException("Недействительный токен");
         }
     }
 
@@ -47,7 +47,7 @@ public class Token implements IToken {
 
             return login.equals(dBody.getOrDefault("login", ""));
         }catch (Exception e){
-            throw new NotAuthorizedException("Invalid Token");
+            throw new NotAuthorizedException("Недействительный токен");
         }
     }
 
