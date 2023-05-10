@@ -5,5 +5,5 @@ public interface IDocReader {
 
     void setDoc(String data);
 
-    void saveFile() throws Exception;
+    void saveFile(String userName) throws Exception;
 }

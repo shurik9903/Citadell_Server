@@ -35,10 +35,8 @@ public class DocController {
     @GET
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doGet(@QueryParam("name") String fileName, @QueryParam("start") int start, @QueryParam("diapason") int diapason, @HeaderParam("X-Authentication-decrypted") String userID) {
+    public Response doGet(@QueryParam("name") String fileName, @QueryParam("start") int start, @QueryParam("diapason") int diapason, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
         try {
-
-            System.out.println("Testing " + fileName + " " + start + " " + diapason);
 
             if (fileName == null && start == 0 && diapason == 0){
                 return doc.allDocs(userID);
@@ -48,7 +46,7 @@ public class DocController {
                 return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + "Имя файла не может быть пустым").build();
             }
 
-            return doc.readDoc(fileName, start, diapason, userID);
+            return doc.readDoc(fileName, start, diapason, userID, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
@@ -59,9 +57,9 @@ public class DocController {
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doPost(String document, @HeaderParam("X-Authentication-decrypted") String userID) {
+    public Response doPost(String document, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
         try {
-            return doc.saveFile(document, userID);
+            return doc.saveFile(document, userID, userLogin);
         }catch (Exception e) {
             return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка: " + e.getMessage()).build();
         }
@@ -70,9 +68,9 @@ public class DocController {
     @PUT
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doPut(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID) {
+    public Response doPut(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
         try {
-            return doc.overwriteFile(fileName, userID);
+            return doc.overwriteFile(fileName, userID, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();

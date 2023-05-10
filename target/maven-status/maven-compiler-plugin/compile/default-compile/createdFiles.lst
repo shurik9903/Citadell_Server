@@ -29,6 +29,7 @@ org\example\model\token\TokenIssuer.class
 org\example\model\rabbit\Rabbit.class
 org\example\model\doc\docReader\DocReaderFactory.class
 org\example\controller\API\DocController.class
+org\example\data\mydata\DDocXLS$SizeTable.class
 org\example\controller\API\Ping.class
 org\example\controller\WebSocket\WebSocket$1.class
 org\example\controller\Filter\RestResponseFilter.class

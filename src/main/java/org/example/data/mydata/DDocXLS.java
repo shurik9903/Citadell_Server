@@ -1,7 +1,9 @@
 package org.example.data.mydata;
 
+import jakarta.json.JsonObject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import org.w3c.dom.events.Event;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,13 +11,54 @@ import java.util.Map;
 
 public class DDocXLS {
 
+     public static class SizeTable{
+        private String colStart;
+        private String colSize;
+        private String rowStart;
+        private String rowSize;
+
+        public String getColStart() {
+            return colStart;
+        }
+
+        public void setColStart(String colStart) {
+            this.colStart = colStart;
+        }
+
+        public String getColSize() {
+            return colSize;
+        }
+
+        public void setColSize(String colSize) {
+            this.colSize = colSize;
+        }
+
+        public String getRowStart() {
+            return rowStart;
+        }
+
+        public void setRowStart(String rowStart) {
+            this.rowStart = rowStart;
+        }
+
+        public String getRowSize() {
+            return rowSize;
+        }
+
+        public void setRowSize(String rowSize) {
+            this.rowSize = rowSize;
+        }
+    }
+
     private String fullName;
     private String name;
     private String type;
     private String bytes;
     private Boolean title;
     private Boolean autoSize;
-    private Map<String, String> sizeTable;
+    //    private Map<String, String> sizeTable;
+    private SizeTable sizeTable;
+//    private JsonObject sizeTable;
 
     public String getFullName() {
         return fullName;
@@ -65,12 +108,30 @@ public class DDocXLS {
         this.autoSize = autoSize;
     }
 
-    public Map<String, String> getSizeTable() {
+//    public Map<String, String> getSizeTable() {
+//        return sizeTable;
+//    }
+//
+//    public void setSizeTable(Map<String, String> sizeTable) {
+//        this.sizeTable = sizeTable;
+//    }
+
+
+    public SizeTable getSizeTable() {
         return sizeTable;
     }
 
-    public void setSizeTable(Map<String, String> sizeTable) {
+    public void setSizeTable(SizeTable sizeTable) {
         this.sizeTable = sizeTable;
     }
+
+
+//    public JsonObject getSizeTable() {
+//        return sizeTable;
+//    }
+//
+//    public void setSizeTable(JsonObject sizeTable) {
+//        this.sizeTable = sizeTable;
+//    }
 
 }

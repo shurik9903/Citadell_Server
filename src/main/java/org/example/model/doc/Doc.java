@@ -45,8 +45,6 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-
-
             Result.put("Msg", "");
             return Response.ok(jsonb.toJson(Result)).build();
 
@@ -60,8 +58,6 @@ public class Doc implements IDoc{
     public Response allDocs(String userID) {
 
         Jsonb jsonb = JsonbBuilder.create();
-
-
 
         Map<String, String> Result = new HashMap<>();
 
@@ -90,34 +86,37 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response saveFile(String document, String userID){
+    public Response saveFile(String document, String userID, String userLogin){
         try {
 
-        Jsonb jsonb = JsonbBuilder.create();
-        Map<String, String> Result = new HashMap<>();
+            Jsonb jsonb = JsonbBuilder.create();
+            Map<String, String> Result = new HashMap<>();
 
-        Map<String, String> data = new HashMap<>();
-        data = (Map<String, String>) jsonb.fromJson(document, data.getClass());
+            Map<String, String> data = new HashMap<>();
+            data = (Map<String, String>) jsonb.fromJson(document, data.getClass());
 
-        String type = data.getOrDefault("type", null);
+            String type = data.getOrDefault("type", null);
 
-        IDocReader docReader = DocReaderFactory.getDocReader(type);
+            IDocReader docReader = DocReaderFactory.getDocReader(type);
 
-        docReader.setDoc(document);
+            docReader.setDoc(document);
+            docReader.saveFile(userLogin);
 
             if (!DataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + docReader.getFullName());
+            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin  + File.separator + docReader.getFullName());
             FileInputStream input = new FileInputStream(fileDownload);
 
             MutableBoolean replace = new MutableBoolean(false);
             Result.put("Msg", DataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
             Result.put("Replace", replace.toString());
-            return Response.ok(jsonb.toJson(Result)).build();
 
+            input.close();
+
+            return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
@@ -125,7 +124,7 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response overwriteFile(String doc_name, String userid){
+    public Response overwriteFile(String doc_name, String userid, String userLogin){
 
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
@@ -136,12 +135,14 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + doc_name);
+            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + doc_name);
             FileInputStream input = new FileInputStream(fileDownload);
 
             Result.put("Msg", DataBaseWork.overwriteFile(doc_name, input.readAllBytes(), userid));
-            return Response.ok(jsonb.toJson(Result)).build();
 
+            input.close();
+
+            return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
@@ -155,29 +156,29 @@ public class Doc implements IDoc{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + "0e6b95c2b8eee44ccbd042dbefadfed2.jpg");
-
-            ArrayList<Integer> loadInt = new ArrayList<>();
-
-            for (Byte b: Files.readAllBytes(fileDownload.toPath())){
-                loadInt.add(Byte.toUnsignedInt(b));
-            }
-
-            Result.put("file_name", fileDownload.getName());
-            Result.put("file_byte", loadInt.toString());
-
-        } catch (Exception e){
-            System.out.println("Ошибка при загрузке файла: " + e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-        }
-
-        try {
-            if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
-
-            Result.put("Msg", "");
+//            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
+//
+//            ArrayList<Integer> loadInt = new ArrayList<>();
+//
+//            for (Byte b: Files.readAllBytes(fileDownload.toPath())){
+//                loadInt.add(Byte.toUnsignedInt(b));
+//            }
+//
+//            Result.put("file_name", fileDownload.getName());
+//            Result.put("file_byte", loadInt.toString());
+//
+//        } catch (Exception e){
+//            System.out.println("Ошибка при загрузке файла: " + e.getMessage());
+//            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
+//        }
+//
+//        try {
+//            if (!DataBaseWork.ping()) {
+//                Result.put("Msg", "Нет соединения с базой данных");
+//                return Response.ok(jsonb.toJson(Result)).build();
+//            }
+//
+//            Result.put("Msg", "");
             return Response.ok(jsonb.toJson(Result)).build();
 
         } catch (Exception e) {
@@ -186,7 +187,7 @@ public class Doc implements IDoc{
         }
     }
 
-    private DExcel excelParser(String fileName, int start, int number){
+    private DExcel excelParser(String fileName, int start, int number, String userLogin){
 
         if (start < 1)
             start = 1;
@@ -198,7 +199,7 @@ public class Doc implements IDoc{
 //            return new DExcel("Quantity cannot be less than 1");
 
         try {
-            FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + fileName);
+            FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
             Workbook workbook = new XSSFWorkbook(file);
 
             Sheet sheet = workbook.getSheetAt(0);
@@ -247,10 +248,10 @@ public class Doc implements IDoc{
         }
     }
 
-    private DExcel excelParser(String fileName){
+    private DExcel excelParser(String fileName, String userLogin){
 
         try {
-            FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + fileName);
+            FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
             Workbook workbook = new XSSFWorkbook(file);
 
             Sheet sheet = workbook.getSheetAt(0);
@@ -291,7 +292,7 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response readDoc(String doc_name, int start, int diapason, String userid) {
+    public Response readDoc(String doc_name, int start, int diapason, String userid, String userLogin) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -308,7 +309,7 @@ public class Doc implements IDoc{
             }
 
 
-            File customDir = new File(ServerProperties.getProperty("filepath"));
+            File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin);
             if (!customDir.exists()) {
                 customDir.mkdir();
             }
@@ -319,7 +320,7 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            Result.put("Data", jsonb.toJson(excelParser(eFile.getFile_name(), start, diapason).toJson()));
+            Result.put("Data", jsonb.toJson(excelParser(eFile.getFile_name(), start, diapason, userLogin).toJson()));
             Result.put("Msg", "");
 
             return Response.ok(jsonb.toJson(Result)).build();
