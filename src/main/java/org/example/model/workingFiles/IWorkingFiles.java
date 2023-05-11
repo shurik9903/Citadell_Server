@@ -1,11 +1,14 @@
 package org.example.model.workingFiles;
 
+import jakarta.ws.rs.core.Response;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import java.io.IOException;
 
 public interface IWorkingFiles {
-    boolean writeFile(byte[] content, String filename) throws IOException;
+    Response saveFile(String document, String userID, String userLogin);
 
-    boolean writeFile(Workbook workbook, String filename) throws IOException;
+    Response overwriteFile(String doc_name, String userid, String userLogin);
+
+    Response loadFile();
 }

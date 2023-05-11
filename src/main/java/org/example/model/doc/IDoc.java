@@ -7,11 +7,7 @@ public interface IDoc {
 
     Response allDocs(String userID);
 
-    Response saveFile(String document, String userID, String userLogin);
-
-    Response overwriteFile(String doc_name, String userid, String userLogin);
-
-    Response loadFile();
-
     Response readDoc(String doc_name, int start, int diapason, String userid, String userLogin);
+
+    Response updateDoc(String docData, String userLogin);
 }

@@ -1,6 +1,7 @@
 org\example\model\login\ILogin.class
 org\example\model\database\IDataBaseWork.class
 org\example\model\doc\docReader\DocXLS.class
+org\example\model\utils\FileUtils.class
 org\example\controller\API\API.class
 org\example\controller\API\RabbitController.class
 org\example\controller\API\LoginController.class
@@ -20,6 +21,7 @@ org\example\model\dictionary\IDictionary.class
 org\example\model\doc\Doc.class
 org\example\controller\API\DictionaryController.class
 org\example\data\entity\ELogin.class
+org\example\data\mydata\DDocRowReport.class
 org\example\model\token\ITokenValidator.class
 org\example\data\entity\ENameFiles.class
 org\example\model\doc\docReader\IDocReader.class
@@ -41,11 +43,14 @@ org\example\controller\WebSocket\WebSocket.class
 org\example\controller\Filter\RestAuthorizedFilter.class
 org\example\model\workingFiles\WorkingFiles.class
 org\example\model\token\TokenRequired.class
+org\example\controller\API\FileController.class
 org\example\model\workingFiles\IWorkingFiles.class
 org\example\data\mydata\DExcel.class
 org\example\data\mydata\DDocXLS.class
 org\example\model\token\Token.class
 org\example\model\token\IToken.class
 org\example\model\token\TokenValidator.class
+org\example\model\utils\IFileUtils.class
+org\example\data\mydata\DDocData.class
 org\example\model\properties\ServerProperties.class
 org\example\model\token\ITokenKey.class

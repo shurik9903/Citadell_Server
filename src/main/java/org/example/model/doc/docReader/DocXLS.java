@@ -1,5 +1,6 @@
 package org.example.model.doc.docReader;
 
+import jakarta.json.JsonArrayBuilder;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import org.apache.commons.lang3.ArrayUtils;
@@ -7,21 +8,23 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.example.data.mydata.DDocData;
 import org.example.data.mydata.DDocXLS;
+import org.example.data.mydata.DExcel;
 import org.example.model.properties.ServerProperties;
+import org.example.model.utils.FileUtils;
+import org.example.model.utils.IFileUtils;
 import org.example.model.workingFiles.IWorkingFiles;
 import org.example.model.workingFiles.WorkingFiles;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 public class DocXLS implements IDocReader {
 
     private DDocXLS docXLS;
 
-    private final IWorkingFiles workingFiles = new WorkingFiles();
+    private final IFileUtils fileUtils = new FileUtils();
 
     @Override
     public String getFullName() {
@@ -35,7 +38,7 @@ public class DocXLS implements IDocReader {
     }
 
     @Override
-    public void saveFile(String userName) throws Exception {
+    public void saveFile(String savePath) throws Exception {
         if (docXLS == null)
             throw new Exception("Ошибка при сохранении файла");
 
@@ -174,21 +177,100 @@ public class DocXLS implements IDocReader {
             }
         }
 
-        File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userName);
+        int colLast = outSheet.getRow(0).getLastCellNum();
+        int rowLast = outSheet.getLastRowNum();
+
+        outSheet.getRow(0).createCell(colLast).setCellValue("Анализированное сообщение");
+        outSheet.getRow(0).createCell(colLast + 1).setCellValue("Вероятность");
+        outSheet.getRow(0).createCell(colLast + 2).setCellValue("Обновить");
+        outSheet.getRow(0).createCell(colLast + 3).setCellValue("Ошибка");
+
+        for (int rowNum = 1; rowNum <= rowLast; ++rowNum){
+            outSheet.getRow(rowNum).createCell(colLast + 2).setCellValue("false");
+            outSheet.getRow(rowNum).createCell(colLast + 3).setCellValue("false");
+        }
+
+        File customDir = new File(savePath);
         if (!customDir.exists()) {
             customDir.mkdir();
         }
 
         String doc_path = customDir.getCanonicalPath() + File.separator + docXLS.getFullName();
 
-        if (! workingFiles.writeFile(outWorkbook, doc_path)) {
+        if (! fileUtils.writeFile(outWorkbook, doc_path)) {
             throw new Exception("Ошибка при сохранении файла");
         }
 
         origFile.close();
     }
 
+    @Override
+    public void updateDoc(String docPath, String docData) throws IOException {
+        FileInputStream file = new FileInputStream(docPath);
+        Workbook workbook = new XSSFWorkbook(file);
 
+        Sheet sheet = workbook.getSheetAt(0);
+
+        System.out.println(docData);
+    }
+
+    @Override
+    public String parser(String loadPath, int start, int number) throws Exception {
+
+        if (start < 1)
+            start = 1;
+//            throw  new Exception("Start cannot be less than 1");
+
+
+        if (number < 1)
+            number = 25;
+//        throw  new Exception("Quantity cannot be less than 1");
+
+        try {
+            FileInputStream file = new FileInputStream(loadPath);
+            Workbook workbook = new XSSFWorkbook(file);
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Map<Integer, ArrayList<String>> rows = new HashMap<>();
+            ArrayList<String> title = new ArrayList<>();
+
+            int i = 0;
+            for (Row row : sheet) {
+                ++i;
+                if (i < start)
+                    continue;
+
+                if (i > start + number - 1) break;
+                if (i == 1) {
+                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                        Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                        if (cell == null)
+                            title.add("");
+                        else
+                            title.add(cell.getStringCellValue());
+                    }
+                } else {
+                    rows.put(i, new ArrayList<>());
+                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                        Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                        if (cell == null)
+                            rows.get(i).add("");
+                        else
+                            rows.get(i).add(cell.getStringCellValue());
+                    }
+                }
+            }
+
+            file.close();
+
+            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title)) ;
+
+        }catch (Exception e){
+            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
+            throw new Exception("Error: " + e.getMessage());
+        }
+    }
 
 
 

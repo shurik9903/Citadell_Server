@@ -53,24 +53,13 @@ public class DocController {
         }
     }
 
-    @POST
+    @PUT
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doPost(String document, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
+    public Response doPut(String docData, @HeaderParam("login") String userLogin) {
         try {
-            return doc.saveFile(document, userID, userLogin);
-        }catch (Exception e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка: " + e.getMessage()).build();
-        }
-    }
-
-    @PUT
-    @Produces("application/json; charset=UTF-8")
-    @TokenRequired
-    public Response doPut(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
-        try {
-            return doc.overwriteFile(fileName, userID, userLogin);
+            return doc.updateDoc(docData, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();

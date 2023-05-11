@@ -13,11 +13,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
+import org.example.data.mydata.DDocData;
+import org.example.data.mydata.DDocXLS;
 import org.example.data.mydata.DExcel;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.doc.docReader.DocReaderFactory;
 import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
+import org.example.model.utils.IFileUtils;
 import org.example.model.workingFiles.IWorkingFiles;
 
 import java.io.File;
@@ -31,7 +34,7 @@ public class Doc implements IDoc{
     private IDataBaseWork DataBaseWork;
 
     @Inject
-    private IWorkingFiles workingFiles;
+    private IFileUtils fileUtils;
 
     @Override
     public Response loadDoc(String name){
@@ -85,47 +88,9 @@ public class Doc implements IDoc{
 
     }
 
-    @Override
-    public Response saveFile(String document, String userID, String userLogin){
-        try {
-
-            Jsonb jsonb = JsonbBuilder.create();
-            Map<String, String> Result = new HashMap<>();
-
-            Map<String, String> data = new HashMap<>();
-            data = (Map<String, String>) jsonb.fromJson(document, data.getClass());
-
-            String type = data.getOrDefault("type", null);
-
-            IDocReader docReader = DocReaderFactory.getDocReader(type);
-
-            docReader.setDoc(document);
-            docReader.saveFile(userLogin);
-
-            if (!DataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
-
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin  + File.separator + docReader.getFullName());
-            FileInputStream input = new FileInputStream(fileDownload);
-
-            MutableBoolean replace = new MutableBoolean(false);
-            Result.put("Msg", DataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
-            Result.put("Replace", replace.toString());
-
-            input.close();
-
-            return Response.ok(jsonb.toJson(Result)).build();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
-        }
-    }
 
     @Override
-    public Response overwriteFile(String doc_name, String userid, String userLogin){
-
+    public Response updateDoc(String docData, String userLogin) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -135,116 +100,31 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + doc_name);
-            FileInputStream input = new FileInputStream(fileDownload);
+            System.out.println(docData);
 
-            Result.put("Msg", DataBaseWork.overwriteFile(doc_name, input.readAllBytes(), userid));
+            DDocData dDocData = jsonb.fromJson(docData, DDocData.class);
+            System.out.println("Test");
+            IDocReader docReader = DocReaderFactory.getDocReader(dDocData.getDocName().substring(dDocData.getDocName().lastIndexOf('.')));
+//            docReader.updateDoc(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + dDocData.getDocName(), dDocData.getDocData());
 
-            input.close();
-
-            return Response.ok(jsonb.toJson(Result)).build();
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
-        }
-    }
-
-    @Override
-    public Response loadFile(){
-
-        Jsonb jsonb = JsonbBuilder.create();
-        Map<String, String> Result = new HashMap<>();
-
-        try {
-//            File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
-//
-//            ArrayList<Integer> loadInt = new ArrayList<>();
-//
-//            for (Byte b: Files.readAllBytes(fileDownload.toPath())){
-//                loadInt.add(Byte.toUnsignedInt(b));
+//            File customDir = new File();
+//            if (!customDir.exists()) {
+//                customDir.mkdir();
 //            }
+//            String doc_path = customDir.getCanonicalPath() ;
 //
-//            Result.put("file_name", fileDownload.getName());
-//            Result.put("file_byte", loadInt.toString());
-//
-//        } catch (Exception e){
-//            System.out.println("Ошибка при загрузке файла: " + e.getMessage());
-//            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-//        }
-//
-//        try {
-//            if (!DataBaseWork.ping()) {
-//                Result.put("Msg", "Нет соединения с базой данных");
+//            if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
+//                Result.put("Msg", "Ошибка при сохранении файла");
 //                return Response.ok(jsonb.toJson(Result)).build();
 //            }
 //
-//            Result.put("Msg", "");
-            return Response.ok(jsonb.toJson(Result)).build();
+//            Result.put("Data", docReader.parser(doc_path, start, diapason));
+            Result.put("Msg", "");
 
+            return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-        }
-    }
-
-    private DExcel excelParser(String fileName, int start, int number, String userLogin){
-
-        if (start < 1)
-            start = 1;
-//            return new DExcel("Start cannot be less than 1");
-
-
-        if (number < 1)
-            number = 25;
-//            return new DExcel("Quantity cannot be less than 1");
-
-        try {
-            FileInputStream file = new FileInputStream(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
-            Workbook workbook = new XSSFWorkbook(file);
-
-            Sheet sheet = workbook.getSheetAt(0);
-
-            Map<Integer, ArrayList<String>> rows = new HashMap<>();
-            ArrayList<String> title = new ArrayList<>();
-
-//            for (int i = start; i <= sheet.getPhysicalNumberOfRows() && i <= start + number; i++){
-//                sheet.getRow(i);
-//
-//            }
-
-            int i = 0;
-            for (Row row : sheet) {
-                i++;
-                if (i < start)
-                    continue;
-
-                if (i > start + number - 1) break;
-
-                if (i == 1) {
-                    for (Cell cell : row) {
-                        switch (cell.getCellType()) {
-                            case STRING -> title.add(cell.getStringCellValue());
-                            case NUMERIC -> title.add(String.valueOf(cell.getNumericCellValue()));
-                        }
-                    }
-                } else {
-                    rows.put(i, new ArrayList<>());
-                    for (Cell cell : row) {
-                        switch (cell.getCellType()) {
-                            case STRING -> rows.get(i).add(cell.getStringCellValue());
-                            case NUMERIC -> rows.get(i).add(String.valueOf(cell.getNumericCellValue()));
-                        }
-                    }
-                }
-            }
-
-            file.close();
-
-            return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
-
-        }catch (Exception e){
-            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
-            return new DExcel("Error: " + e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
         }
     }
 
@@ -308,6 +188,7 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
+            IDocReader docReader = DocReaderFactory.getDocReader(doc_name.substring(doc_name.lastIndexOf('.')));
 
             File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin);
             if (!customDir.exists()) {
@@ -315,12 +196,12 @@ public class Doc implements IDoc{
             }
             String doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
 
-            if (! workingFiles.writeFile(eFile.getFile_byte(), doc_path)) {
+            if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
                 Result.put("Msg", "Ошибка при сохранении файла");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            Result.put("Data", jsonb.toJson(excelParser(eFile.getFile_name(), start, diapason, userLogin).toJson()));
+            Result.put("Data", docReader.parser(doc_path, start, diapason));
             Result.put("Msg", "");
 
             return Response.ok(jsonb.toJson(Result)).build();
