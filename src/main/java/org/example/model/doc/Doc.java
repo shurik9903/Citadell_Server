@@ -14,7 +14,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.mydata.DDocData;
-import org.example.data.mydata.DDocXLS;
 import org.example.data.mydata.DExcel;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.doc.docReader.DocReaderFactory;
@@ -39,7 +38,6 @@ public class Doc implements IDoc{
     @Override
     public Response loadDoc(String name){
         Jsonb jsonb = JsonbBuilder.create();
-
         Map<String, String> Result = new HashMap<>();
 
         try {
@@ -90,7 +88,7 @@ public class Doc implements IDoc{
 
 
     @Override
-    public Response updateDoc(String docData, String userLogin) {
+    public Response updateDoc(String fileName,String docData, String userLogin, String userID) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -100,25 +98,9 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            System.out.println(docData);
+            IDocReader docReader = DocReaderFactory.getDocReader(fileName.substring(fileName.lastIndexOf('.')));
+            docReader.updateDoc(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName, docData, userID);
 
-            DDocData dDocData = jsonb.fromJson(docData, DDocData.class);
-            System.out.println("Test");
-            IDocReader docReader = DocReaderFactory.getDocReader(dDocData.getDocName().substring(dDocData.getDocName().lastIndexOf('.')));
-//            docReader.updateDoc(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + dDocData.getDocName(), dDocData.getDocData());
-
-//            File customDir = new File();
-//            if (!customDir.exists()) {
-//                customDir.mkdir();
-//            }
-//            String doc_path = customDir.getCanonicalPath() ;
-//
-//            if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
-//                Result.put("Msg", "Ошибка при сохранении файла");
-//                return Response.ok(jsonb.toJson(Result)).build();
-//            }
-//
-//            Result.put("Data", docReader.parser(doc_path, start, diapason));
             Result.put("Msg", "");
 
             return Response.ok(jsonb.toJson(Result)).build();
@@ -172,7 +154,7 @@ public class Doc implements IDoc{
     }
 
     @Override
-    public Response readDoc(String doc_name, int start, int diapason, String userid, String userLogin) {
+    public Response readDoc(String docName, int start, int diapason, String userid, String userLogin) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -182,25 +164,27 @@ public class Doc implements IDoc{
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            EFile eFile = DataBaseWork.loadFile(doc_name, userid);
-            if (eFile.getMsg() != null) {
-                Result.put("Msg", eFile.getMsg());
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
-
-            IDocReader docReader = DocReaderFactory.getDocReader(doc_name.substring(doc_name.lastIndexOf('.')));
-
             File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin);
-            if (!customDir.exists()) {
+            String doc_path = customDir.getCanonicalPath() + File.separator + docName;
+
+            if (!customDir.exists() && !(new File(doc_path).exists())) {
                 customDir.mkdir();
-            }
-            String doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
 
-            if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
-                Result.put("Msg", "Ошибка при сохранении файла");
-                return Response.ok(jsonb.toJson(Result)).build();
+                EFile eFile = DataBaseWork.loadFile(docName, userid);
+                if (eFile.getMsg() != null) {
+                    Result.put("Msg", eFile.getMsg());
+                    return Response.ok(jsonb.toJson(Result)).build();
+                }
+
+                doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
+
+                if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
+                    Result.put("Msg", "Ошибка при сохранении файла");
+                    return Response.ok(jsonb.toJson(Result)).build();
+                }
             }
 
+            IDocReader docReader = DocReaderFactory.getDocReader(docName.substring(docName.lastIndexOf('.')));
             Result.put("Data", docReader.parser(doc_path, start, diapason));
             Result.put("Msg", "");
 

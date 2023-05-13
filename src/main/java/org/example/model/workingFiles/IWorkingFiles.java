@@ -8,7 +8,7 @@ import java.io.IOException;
 public interface IWorkingFiles {
     Response saveFile(String document, String userID, String userLogin);
 
-    Response overwriteFile(String doc_name, String userid, String userLogin);
+    Response overwriteFile(String docName, String userid, String userLogin);
 
-    Response loadFile();
+    Response loadFile(String userid, String userLogin, String docName);
 }

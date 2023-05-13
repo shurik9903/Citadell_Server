@@ -1,14 +1,5 @@
 package org.example.data.mydata;
 
-import jakarta.json.JsonObject;
-import jakarta.json.bind.Jsonb;
-import jakarta.json.bind.JsonbBuilder;
-import org.w3c.dom.events.Event;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class DDocXLS {
 
      public static class SizeTable{
@@ -108,15 +99,6 @@ public class DDocXLS {
         this.autoSize = autoSize;
     }
 
-//    public Map<String, String> getSizeTable() {
-//        return sizeTable;
-//    }
-//
-//    public void setSizeTable(Map<String, String> sizeTable) {
-//        this.sizeTable = sizeTable;
-//    }
-
-
     public SizeTable getSizeTable() {
         return sizeTable;
     }
@@ -126,12 +108,5 @@ public class DDocXLS {
     }
 
 
-//    public JsonObject getSizeTable() {
-//        return sizeTable;
-//    }
-//
-//    public void setSizeTable(JsonObject sizeTable) {
-//        this.sizeTable = sizeTable;
-//    }
 
 }

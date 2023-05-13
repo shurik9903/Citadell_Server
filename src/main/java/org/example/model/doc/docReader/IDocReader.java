@@ -12,7 +12,7 @@ public interface IDocReader {
 
     void saveFile(String savePath) throws Exception;
 
-    void updateDoc(String docPath, String docData) throws IOException;
+    void updateDoc(String docPath, String docData, String userID) throws Exception;
 
     String parser(String loadPath, int start, int number) throws Exception;
 }

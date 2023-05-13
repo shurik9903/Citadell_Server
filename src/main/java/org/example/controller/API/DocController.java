@@ -12,26 +12,6 @@ public class DocController {
     @Inject
     private IDoc doc;
 
-//    @GET
-////    @Path("{name:.*}")
-//    @Produces("application/json")
-//    public Response doGet(@QueryParam("name") String fileName, @HeaderParam("UserID") String userID ,@HeaderParam("Token") String UserToken) {
-//        try {
-//            try {
-//                ITokenKey tokenKey = new TokenKey();
-//                ITokenValidator tokenValidator = new TokenValidator(tokenKey.getKey());
-//                tokenValidator.validate(UserToken);
-//            } catch (Exception e) {
-//                return Response.status(Response.Status.FORBIDDEN).entity("|Error: " + e.getMessage()).build();
-//            }
-//            System.out.println("Test1: " + fileName);
-//            return doc.readDoc(fileName, userID);
-//        } catch (Exception e) {
-//            System.out.println("|Error: " + e);
-//            return Response.status(Response.Status.BAD_REQUEST).entity("|Error: " + e.getMessage()).build();
-//        }
-//    }
-
     @GET
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
@@ -57,9 +37,9 @@ public class DocController {
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doPut(String docData, @HeaderParam("login") String userLogin) {
+    public Response doPut(String docData, @QueryParam("name") String fileName, @HeaderParam("login") String userLogin, @HeaderParam("X-Authentication-decrypted") String userID) {
         try {
-            return doc.updateDoc(docData, userLogin);
+            return doc.updateDoc(fileName, docData, userLogin, userID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();

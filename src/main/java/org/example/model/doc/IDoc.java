@@ -7,7 +7,7 @@ public interface IDoc {
 
     Response allDocs(String userID);
 
-    Response readDoc(String doc_name, int start, int diapason, String userid, String userLogin);
+    Response readDoc(String docName, int start, int diapason, String userid, String userLogin);
 
-    Response updateDoc(String docData, String userLogin);
+    Response updateDoc(String fileName, String docData, String userLogin, String userID);
 }

@@ -8,6 +8,7 @@ http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
       <class>org.example.data.entity.ELogin</class>
       <class>org.example.data.entity.EFile</class>
       <class>org.example.data.entity.ENameFiles</class>
+      <class>org.example.data.entity.EReport</class>
   </persistence-unit>
 
 </persistence>

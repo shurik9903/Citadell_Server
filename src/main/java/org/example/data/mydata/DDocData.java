@@ -3,22 +3,42 @@ package org.example.data.mydata;
 
 public class DDocData {
 
-    private String docName;
-//    private String docData;
+    private String type;
+    private String index;
+    private String select;
+    private String message;
 
-    public String getDocName() {
-        return docName;
+
+    public String getType() {
+        return type;
     }
 
-    public void setDocName(String docName) {
-        this.docName = docName;
+    public void setType(String type) {
+        this.type = type;
     }
 
-//    public String getDocData() {
-//        return docData;
-//    }
-//
-//    public void setDocData(String docData) {
-//        this.docData = docData;
-//    }
+    public String getIndex() {
+        return index;
+    }
+
+    public void setIndex(String index) {
+        this.index = index;
+    }
+
+    public String getSelect() {
+        return select;
+    }
+
+    public void setSelect(String select) {
+        this.select = select;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }

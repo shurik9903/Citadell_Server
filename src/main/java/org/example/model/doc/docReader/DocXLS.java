@@ -1,21 +1,15 @@
 package org.example.model.doc.docReader;
 
-import jakarta.json.JsonArrayBuilder;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.example.data.mydata.DDocData;
-import org.example.data.mydata.DDocXLS;
-import org.example.data.mydata.DExcel;
+import org.example.data.mydata.*;
 import org.example.model.properties.ServerProperties;
+import org.example.model.report.Report;
 import org.example.model.utils.FileUtils;
 import org.example.model.utils.IFileUtils;
-import org.example.model.workingFiles.IWorkingFiles;
-import org.example.model.workingFiles.WorkingFiles;
 
 import java.io.*;
 import java.util.*;
@@ -183,7 +177,7 @@ public class DocXLS implements IDocReader {
         outSheet.getRow(0).createCell(colLast).setCellValue("Анализированное сообщение");
         outSheet.getRow(0).createCell(colLast + 1).setCellValue("Вероятность");
         outSheet.getRow(0).createCell(colLast + 2).setCellValue("Обновить");
-        outSheet.getRow(0).createCell(colLast + 3).setCellValue("Ошибка");
+        outSheet.getRow(0).createCell(colLast + 3).setCellValue("Отчет");
 
         for (int rowNum = 1; rowNum <= rowLast; ++rowNum){
             outSheet.getRow(rowNum).createCell(colLast + 2).setCellValue("false");
@@ -201,30 +195,74 @@ public class DocXLS implements IDocReader {
             throw new Exception("Ошибка при сохранении файла");
         }
 
+        if (! fileUtils.writeFile("[]", doc_path + ".json")) {
+            throw new Exception("Ошибка при сохранении файла");
+        }
+
         origFile.close();
     }
 
     @Override
-    public void updateDoc(String docPath, String docData) throws IOException {
-        FileInputStream file = new FileInputStream(docPath);
-        Workbook workbook = new XSSFWorkbook(file);
+    public void updateDoc(String docPath, String docData, String userID) throws Exception {
+//        try {
 
-        Sheet sheet = workbook.getSheetAt(0);
+            FileInputStream file = new FileInputStream(docPath);
+            Workbook workbook = new XSSFWorkbook(file);
 
-        System.out.println(docData);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Jsonb jsonb = JsonbBuilder.create();
+            DDocData data = jsonb.fromJson(docData, DDocData.class);
+
+            ArrayList<DReport> reports = fileUtils.getReportFile(docPath);
+
+
+                Row row = sheet.getRow(Integer.parseInt(data.getIndex()));
+
+                int colLast = row.getLastCellNum()-1;
+
+                if (data.getType().equals("report")) {
+                    row.getCell(colLast).setCellValue(data.getSelect());
+
+                    DReport dReport = new DReport();
+                    dReport.setRowNum(data.getIndex());
+                    dReport.setUserID(userID);
+                    dReport.setMessage(data.getMessage());
+
+                    reports.add(dReport);
+
+                    if (! fileUtils.writeFile(jsonb.toJson(reports), docPath+".json")) {
+                        throw new Exception("Ошибка при сохранении файла");
+                    }
+                }
+                if (data.getType().equals("update"))
+                    row.getCell((colLast - 1)).setCellValue(data.getSelect());
+
+
+
+            if (! fileUtils.writeFile(workbook, docPath)) {
+                throw new Exception("Ошибка при сохранении файла");
+            }
+
+            workbook.close();
+            file.close();
+//        } catch (Exception e){
+//            throw new Exception("Ошибка при изменении файла");
+//        }
     }
+
+
 
     @Override
     public String parser(String loadPath, int start, int number) throws Exception {
 
-        if (start < 1)
-            start = 1;
-//            throw  new Exception("Start cannot be less than 1");
+        ++start;
 
+        if (start < 2)
+            start = 2;
 
         if (number < 1)
             number = 25;
-//        throw  new Exception("Quantity cannot be less than 1");
 
         try {
             FileInputStream file = new FileInputStream(loadPath);
@@ -238,8 +276,7 @@ public class DocXLS implements IDocReader {
             int i = 0;
             for (Row row : sheet) {
                 ++i;
-                if (i < start)
-                    continue;
+
 
                 if (i > start + number - 1) break;
                 if (i == 1) {
@@ -251,6 +288,9 @@ public class DocXLS implements IDocReader {
                             title.add(cell.getStringCellValue());
                     }
                 } else {
+                    if (i < start)
+                        continue;
+
                     rows.put(i, new ArrayList<>());
                     for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
                         Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);

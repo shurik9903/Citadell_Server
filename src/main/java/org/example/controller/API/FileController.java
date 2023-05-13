@@ -37,4 +37,16 @@ public class FileController {
         }
     }
 
+    @GET
+    @Produces("application/json; charset=UTF-8")
+    @TokenRequired
+    public Response doGet(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
+        try {
+            return file.loadFile(userID, userLogin, fileName);
+        } catch (Exception e) {
+            System.out.println("|Error: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+        }
+    }
+
 }

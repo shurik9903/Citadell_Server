@@ -12,6 +12,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.entity.ELogin;
+import org.example.data.mydata.DChangeData;
+import org.example.data.mydata.DReport;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,6 +69,53 @@ public class DataBaseWork implements IDataBaseWork {
     }
 
     @Override
+    public String saveReports(String fileName, String userID, ArrayList<DReport> reports) {
+        EntityManager entityManager = null;
+        try {
+            try {
+                entityManager = EMF.createEntityManager();
+            } catch (Exception e) {
+                return "Ошибка при инициализации Entity Manager";
+            }
+
+            Transaction.begin();
+            entityManager.joinTransaction();
+
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+
+            query.setParameter(1, fileName)
+                    .setParameter(2, userID);
+
+
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+                return "Файл с таким именем не найден";
+            }
+
+            EFile eFile = (EFile) query.getSingleResult();
+
+            for (DReport report : reports) {
+                query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row) values (?, ?, ?, ?)");
+                query.setParameter(1, eFile.getFile_id())
+                        .setParameter(2, userID)
+                        .setParameter(3, report.getMessage())
+                        .setParameter(4, report.getRowNum())
+                        .executeUpdate();
+            }
+
+            Transaction.commit();
+            return "";
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return "Ошибка: " + e.getMessage();
+        } finally {
+            assert entityManager != null;
+            entityManager.close();
+        }
+    }
+
+    @Override
     public String saveFile(String fileName, byte[] fileByte, String userID, MutableBoolean replace) {
         EntityManager entityManager = null;
         try {
@@ -86,7 +135,6 @@ public class DataBaseWork implements IDataBaseWork {
 
             if (query.getResultList().size() != 0) {
                 Transaction.commit();
-//                replace.append("A file with the same name already exists.");
                 replace.setTrue();
                 return "";
             }
