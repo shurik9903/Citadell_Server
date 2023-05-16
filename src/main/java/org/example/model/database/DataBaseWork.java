@@ -12,6 +12,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.example.data.entity.ENameFiles;
 import org.example.data.entity.EFile;
 import org.example.data.entity.ELogin;
+import org.example.data.entity.EReport;
 import org.example.data.mydata.DChangeData;
 import org.example.data.mydata.DReport;
 
@@ -95,12 +96,27 @@ public class DataBaseWork implements IDataBaseWork {
             EFile eFile = (EFile) query.getSingleResult();
 
             for (DReport report : reports) {
-                query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row) values (?, ?, ?, ?)");
-                query.setParameter(1, eFile.getFile_id())
-                        .setParameter(2, userID)
-                        .setParameter(3, report.getMessage())
-                        .setParameter(4, report.getRowNum())
-                        .executeUpdate();
+
+                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ? and row_num = ?", EReport.class);
+                query.setParameter(1, userID)
+                        .setParameter(2, eFile.getFile_id())
+                        .setParameter(3, report.getRowNum());
+
+
+                if (query.getResultList().size() == 0) {
+                    query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row_num) values (?, ?, ?, ?)");
+                    query.setParameter(1, eFile.getFile_id())
+                            .setParameter(2, userID)
+                            .setParameter(3, report.getMessage())
+                            .setParameter(4, report.getRowNum())
+                            .executeUpdate();
+                } else {
+                    EReport eReport = (EReport) query.getSingleResult();
+                    query = entityManager.createNativeQuery("Update user_reports set message = ? where id = ?");
+                    query.setParameter(1, report.getMessage())
+                            .setParameter(2, eReport.getReportID())
+                            .executeUpdate();
+                }
             }
 
             Transaction.commit();
@@ -109,6 +125,57 @@ public class DataBaseWork implements IDataBaseWork {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return "Ошибка: " + e.getMessage();
+        } finally {
+            assert entityManager != null;
+            entityManager.close();
+        }
+    }
+
+    @Override
+    public ArrayList<EReport> loadReports(String fileName, String userID, StringBuilder msg) {
+        EntityManager entityManager = null;
+        try {
+            try {
+                entityManager = EMF.createEntityManager();
+            } catch (Exception e) {
+                msg.append("Ошибка при инициализации Entity Manager");
+            }
+
+            Transaction.begin();
+            entityManager.joinTransaction();
+
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+
+            query.setParameter(1, fileName)
+                    .setParameter(2, userID);
+
+
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+                msg.append("Файл с таким именем не найден");
+            }
+
+            EFile eFile = (EFile) query.getSingleResult();
+
+                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ?", EReport.class);
+                query.setParameter(1, userID)
+                        .setParameter(2, eFile.getFile_id());
+
+            if (query.getResultList().size() == 0) {
+                Transaction.commit();
+                return null;
+            }
+
+            List<EReport> eReports = query.getResultList();
+
+
+            Transaction.commit();
+            return new ArrayList<>(eReports);
+
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            msg.append("Ошибка: " + e.getMessage());
+            return null;
         } finally {
             assert entityManager != null;
             entityManager.close();

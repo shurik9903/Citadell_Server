@@ -72,7 +72,7 @@ public class Doc implements IDoc{
             ArrayList<ENameFiles> eNameFiles = DataBaseWork.allFiles(userID, msg);
 
             if (!msg.isEmpty()){
-                Result.put("Msg", "");
+                Result.put("Msg", msg.toString());
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 

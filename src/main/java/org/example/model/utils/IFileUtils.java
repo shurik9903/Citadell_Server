@@ -2,6 +2,7 @@ package org.example.model.utils;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.example.data.mydata.DReport;
+import org.example.data.mydata.DUserConnect;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,4 +15,8 @@ public interface IFileUtils {
     boolean writeFile(String content, String filename) throws IOException;
 
     ArrayList<DReport> getReportFile(String docPath) throws Exception;
+
+    ArrayList<DUserConnect> getUserConnect() throws  Exception;
+
+    void saveUserConnect(String userConnectJSON) throws  Exception;
 }

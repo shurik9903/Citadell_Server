@@ -13,28 +13,28 @@ public class EReport implements Serializable {
 
     @Id
     @Column(name = "\"id\"")
-    private Integer fileID;
+    private Integer reportID;
 
-    @Column(name = "\"table_id \"")
+    @Column(name = "\"table_id\"")
     private Integer tableID;
 
-    @Column(name = "\"user_id \"")
+    @Column(name = "\"user_id\"")
     private Integer userID;
 
     @Column(name = "\"message\"")
     private String message;
 
-    @Column(name = "\"row\"")
-    private Integer row;
+    @Column(name = "\"row_num\"")
+    private Integer row_num;
 
     public EReport(){}
 
-    public Integer getFileID() {
-        return fileID;
+    public Integer getReportID() {
+        return reportID;
     }
 
-    public void setFileID(Integer fileID) {
-        this.fileID = fileID;
+    public void setReportID(Integer reportID) {
+        this.reportID = reportID;
     }
 
     public Integer getTableID() {
@@ -61,12 +61,13 @@ public class EReport implements Serializable {
         this.message = message;
     }
 
-    public Integer getRow() {
-        return row;
+    public Integer getRow_num() {
+        return row_num;
     }
 
-    public void setRow(Integer row) {
-        this.row = row;
+    public void setRow_num(Integer row_num) {
+        this.row_num = row_num;
     }
+
 
 }

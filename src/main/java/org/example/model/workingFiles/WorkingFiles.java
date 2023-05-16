@@ -8,6 +8,7 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.entity.EFile;
+import org.example.data.entity.EReport;
 import org.example.data.mydata.DReport;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.doc.docReader.DocReaderFactory;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class WorkingFiles implements IWorkingFiles {
 
@@ -87,7 +89,9 @@ public class WorkingFiles implements IWorkingFiles {
             FileInputStream input = new FileInputStream(fileDownload);
 
             String msg = DataBaseWork.overwriteFile(doc_name, input.readAllBytes(), userid);
-            if (msg != null) {
+
+            if (!msg.equals("")) {
+                System.out.println("Testing 1 msg 2 " + msg);
                 Result.put("Msg", msg);
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -97,11 +101,12 @@ public class WorkingFiles implements IWorkingFiles {
             if (!reports.isEmpty())
                 msg = DataBaseWork.saveReports(doc_name, userid, reports);
 
-            if (msg != null) {
+            if (!msg.equals("")) {
                 Result.put("Msg", msg);
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
+            Result.put("Msg", "");
             input.close();
 
             return Response.ok(jsonb.toJson(Result)).build();
@@ -170,13 +175,37 @@ public class WorkingFiles implements IWorkingFiles {
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin);
-            String doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
+            String doc_path = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + eFile.getFile_name();
 
             if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
                 Result.put("Msg", "Ошибка при сохранении файла");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
+
+            StringBuilder msg = new StringBuilder();
+            ArrayList<EReport> eReports = DataBaseWork.loadReports(docName, userid, msg);
+
+            if (!msg.isEmpty()){
+                Result.put("Msg", msg.toString());
+                return Response.ok(jsonb.toJson(Result)).build();
+            }
+
+            if (!eReports.isEmpty()){
+
+                ArrayList<DReport> dReports = eReports.stream().map(e->{
+                    DReport dReport = new DReport();
+                    dReport.setRowNum(String.valueOf(e.getRow_num()));
+                    dReport.setUserID(String.valueOf(e.getUserID()));
+                    dReport.setMessage(e.getMessage());
+                    return dReport;
+                }).collect(Collectors.toCollection(ArrayList::new));
+
+                if (! fileUtils.writeFile(jsonb.toJson(dReports), doc_path + ".json")) {
+                    Result.put("Msg", "Ошибка при сохранении файла");
+                    return Response.ok(jsonb.toJson(Result)).build();
+                }
+            }
+
             Result.put("Msg", "");
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {

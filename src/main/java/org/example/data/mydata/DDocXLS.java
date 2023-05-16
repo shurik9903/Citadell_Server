@@ -47,9 +47,7 @@ public class DDocXLS {
     private String bytes;
     private Boolean title;
     private Boolean autoSize;
-    //    private Map<String, String> sizeTable;
     private SizeTable sizeTable;
-//    private JsonObject sizeTable;
 
     public String getFullName() {
         return fullName;

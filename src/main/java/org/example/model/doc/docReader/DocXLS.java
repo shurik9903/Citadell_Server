@@ -6,8 +6,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.mydata.*;
-import org.example.model.properties.ServerProperties;
-import org.example.model.report.Report;
 import org.example.model.utils.FileUtils;
 import org.example.model.utils.IFileUtils;
 
@@ -204,7 +202,7 @@ public class DocXLS implements IDocReader {
 
     @Override
     public void updateDoc(String docPath, String docData, String userID) throws Exception {
-//        try {
+        try {
 
             FileInputStream file = new FileInputStream(docPath);
             Workbook workbook = new XSSFWorkbook(file);
@@ -246,11 +244,98 @@ public class DocXLS implements IDocReader {
 
             workbook.close();
             file.close();
-//        } catch (Exception e){
-//            throw new Exception("Ошибка при изменении файла");
-//        }
+        } catch (Exception e){
+            throw new Exception("Ошибка при изменении файла");
+        }
     }
 
+    @Override
+    public String parser(String loadPath) throws Exception {
+
+        try {
+            FileInputStream file = new FileInputStream(loadPath);
+            Workbook workbook = new XSSFWorkbook(file);
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            Map<Integer, ArrayList<String>> rows = new HashMap<>();
+            ArrayList<String> title = new ArrayList<>();
+
+            int i = 0;
+            for (Row row : sheet) {
+                ++i;
+
+                if (i == 1) {
+                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                        Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                        if (cell == null)
+                            title.add("");
+                        else
+                            title.add(cell.getStringCellValue());
+                    }
+                } else {
+                    rows.put(i, new ArrayList<>());
+                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                        Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                        if (cell == null)
+                            rows.get(i).add("");
+                        else
+                            rows.get(i).add(cell.getStringCellValue());
+                    }
+                }
+            }
+
+            file.close();
+
+            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title)) ;
+
+        }catch (Exception e){
+            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
+            throw new Exception("Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public ArrayList<Map<String, Object>> parser(String loadPath, int column) throws Exception {
+
+
+        try {
+            FileInputStream file = new FileInputStream(loadPath);
+            Workbook workbook = new XSSFWorkbook(file);
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+
+            ArrayList<Map<String, Object>> rows = new ArrayList<>();
+
+            if (column > sheet.getRow(1).getLastCellNum() - 4) {
+                throw new Exception("Ошибка при разборе Excel: указанный столбец отсутствует");
+            }
+
+            int i = 0;
+            for (Row row : sheet) {
+                ++i;
+
+                if (i == 1)
+                    continue;
+
+                Cell cell = row.getCell(column, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                if (cell != null)
+                    rows.add(new HashMap<>(){{
+                        put("number", row.getRowNum());
+                        put("comment", cell.getStringCellValue());
+                    }});
+            }
+
+            file.close();
+
+            return rows;
+
+        } catch (Exception e) {
+            System.out.println("Ошибка при разборе Excel: " + e.getMessage());
+            throw new Exception("Error: " + e.getMessage());
+        }
+    }
 
 
     @Override
