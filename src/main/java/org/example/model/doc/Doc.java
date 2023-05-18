@@ -21,6 +21,7 @@ import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
 import org.example.model.utils.IFileUtils;
 import org.example.model.workingFiles.IWorkingFiles;
+import org.example.model.workingFiles.WorkingFiles;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +35,9 @@ public class Doc implements IDoc{
 
     @Inject
     private IFileUtils fileUtils;
+
+    @Inject
+    private IWorkingFiles workingFiles;
 
     @Override
     public Response loadDoc(String name){
@@ -88,7 +92,7 @@ public class Doc implements IDoc{
 
 
     @Override
-    public Response updateDoc(String fileName,String docData, String userLogin, String userID) {
+    public Response updateDoc(String fileName, String docData, String userLogin, String userID) {
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
@@ -145,7 +149,7 @@ public class Doc implements IDoc{
 
             file.close();
 
-            return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title);
+            return new DExcel(sheet.getPhysicalNumberOfRows(), rows, title, null);
 
         }catch (Exception e){
             System.out.println("Ошибка при разборе Excel: " + e.getMessage());
@@ -167,21 +171,12 @@ public class Doc implements IDoc{
             File customDir = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin);
             String doc_path = customDir.getCanonicalPath() + File.separator + docName;
 
-            if (!customDir.exists() && !(new File(doc_path).exists())) {
+            if (!customDir.exists()){
                 customDir.mkdir();
+            }
 
-                EFile eFile = DataBaseWork.loadFile(docName, userid);
-                if (eFile.getMsg() != null) {
-                    Result.put("Msg", eFile.getMsg());
-                    return Response.ok(jsonb.toJson(Result)).build();
-                }
-
-                doc_path = customDir.getCanonicalPath() + File.separator + eFile.getFile_name();
-
-                if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
-                    Result.put("Msg", "Ошибка при сохранении файла");
-                    return Response.ok(jsonb.toJson(Result)).build();
-                }
+            if(!(new File(doc_path).exists())){
+                workingFiles.loadFile(userid, userLogin, docName);
             }
 
             IDocReader docReader = DocReaderFactory.getDocReader(docName.substring(docName.lastIndexOf('.')));

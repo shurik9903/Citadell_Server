@@ -91,7 +91,6 @@ public class WorkingFiles implements IWorkingFiles {
             String msg = DataBaseWork.overwriteFile(doc_name, input.readAllBytes(), userid);
 
             if (!msg.equals("")) {
-                System.out.println("Testing 1 msg 2 " + msg);
                 Result.put("Msg", msg);
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -190,20 +189,23 @@ public class WorkingFiles implements IWorkingFiles {
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            if (!eReports.isEmpty()){
+            String writeText = "[]";
 
+            if (eReports != null && !eReports.isEmpty()){
                 ArrayList<DReport> dReports = eReports.stream().map(e->{
                     DReport dReport = new DReport();
                     dReport.setRowNum(String.valueOf(e.getRow_num()));
                     dReport.setUserID(String.valueOf(e.getUserID()));
                     dReport.setMessage(e.getMessage());
+                    dReport.setType(0);
                     return dReport;
                 }).collect(Collectors.toCollection(ArrayList::new));
 
-                if (! fileUtils.writeFile(jsonb.toJson(dReports), doc_path + ".json")) {
-                    Result.put("Msg", "Ошибка при сохранении файла");
-                    return Response.ok(jsonb.toJson(Result)).build();
-                }
+                writeText = jsonb.toJson(dReports);
+            }
+
+            if (! fileUtils.writeFile(writeText, doc_path + ".json")) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка при сохранении файла").build();
             }
 
             Result.put("Msg", "");

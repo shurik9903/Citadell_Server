@@ -16,7 +16,5 @@ public interface IFileUtils {
 
     ArrayList<DReport> getReportFile(String docPath) throws Exception;
 
-    ArrayList<DUserConnect> getUserConnect() throws  Exception;
-
-    void saveUserConnect(String userConnectJSON) throws  Exception;
+    void logs(String text) throws Exception;
 }

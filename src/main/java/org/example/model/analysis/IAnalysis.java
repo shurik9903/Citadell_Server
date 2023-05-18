@@ -7,5 +7,5 @@ public interface IAnalysis {
 
     Response getAnalysisStatus(String uuid);
 
-    Response getAnalysisResult(String uuid);
+    Response getAnalysisResult(String uuid, String userLogin);
 }

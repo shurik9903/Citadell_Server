@@ -11,6 +11,8 @@ import org.example.controller.WebSocket.Message.MessageDecoder;
 import org.example.controller.WebSocket.Message.MessageEncoder;
 import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.data.mydata.DUserConnect;
+import org.example.model.connections.IUserConnections;
+import org.example.model.connections.UserConnections;
 import org.example.model.utils.FileUtils;
 
 import java.util.ArrayList;
@@ -26,13 +28,14 @@ import java.util.Set;
 public class WebSocket {
 
     private static Set<Session> sessions = new HashSet<>();
+    private IUserConnections userConnections = new UserConnections();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("login") String login) {
         try {
             sessions.add(session);
 
-            setUserData(session.getId(), login);
+            userConnections.setUserData(session.getId(), login);
 
             OutMessage outMessage = new OutMessage();
             outMessage.setType("MSG");
@@ -49,7 +52,7 @@ public class WebSocket {
         try {
             sessions.remove(session);
 
-            delUserData(session.getId());
+            userConnections.delUserData(session.getId());
 
             System.out.println("User " + session.getId() + " out");
         }catch (Exception e){
@@ -58,102 +61,52 @@ public class WebSocket {
         }
     }
 
-    private void setUserData(String sessionID, String userLogin) throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-
-        FileUtils fileUtils = new FileUtils();
-
-        ArrayList<DUserConnect> userConnects = fileUtils.getUserConnect();
-
-        Optional<DUserConnect> findUser = userConnects.stream()
-                .filter(dUserConnect -> dUserConnect.getUserLogin().equals(userLogin)).findFirst();
-
-        if (findUser.isPresent()){
-            findUser.get().setConnectID(sessionID);
-        } else {
-            DUserConnect userConnect = new DUserConnect();
-            userConnect.setUserLogin(userLogin);
-            userConnect.setConnectID(sessionID);
-            userConnects.add(userConnect);
-        }
-
-        fileUtils.saveUserConnect(jsonb.toJson(userConnects));
-    }
-
-    private void delUserData(String sessionID) throws Exception {
-        Jsonb jsonb = JsonbBuilder.create();
-
-        FileUtils fileUtils = new FileUtils();
-
-        ArrayList<DUserConnect> userConnects = fileUtils.getUserConnect();
-
-        userConnects.removeIf(dUserConnect -> dUserConnect.getConnectID().equals(sessionID));
-
-        fileUtils.saveUserConnect(jsonb.toJson(userConnects));
-    }
-
-//    @OnMessage
-//    public void onMessage(Session session, InMessage inMessage) {
-//
-//        OutMessage outMessage = new OutMessage();
-//
-//        outMessage.setLogin(inMessage.getLogin());
-//
-//
-//        try {
-//
-//        } catch (Exception e){
-//            System.out.println(" ");
-//        }
-//        new FileUtils().getUserConnect();
-//
-//        OutMessage outMessage = new OutMessage();
-//
-//        outMessage.setLogin(inMessage.getLogin());
-//        outMessage.setType("MSG");
-//        outMessage.setMessage("Test MSG");
-//
-//        for(Session sess : sessions){
-//            try {
-//                sess.getBasicRemote().sendObject(outMessage);
-//            } catch (Exception e) {
-//                System.out.println("Ошибка сообщений WebSocket: " + e.getMessage());
-//            }
-//        }
-//    }
-
     public void sendResultMessage(OutMessage outMessage, String login, DUserConnect.Analysis analysis) {
-
         try {
             Jsonb jsonb = JsonbBuilder.create();
 
             FileUtils fileUtils = new FileUtils();
 
-            ArrayList<DUserConnect> userConnects = fileUtils.getUserConnect();
+            ArrayList<DUserConnect> userConnects = userConnections.getUserConnect();
 
             Optional<DUserConnect> findUser = userConnects.stream()
                     .filter(dUserConnect -> dUserConnect.getUserLogin().equals(login)).findFirst();
 
             if (findUser.isPresent()){
-                    findUser.get().getAnalysis().forEach(value -> {
-                        if (value.getUuid().equals(analysis.getUuid()))
-                            value.setStatus(true);
-                    });
 
-                    Optional<Session> findSession = sessions.stream().filter(session -> session.getId().equals(findUser.get().getConnectID())).findFirst();
+                findUser.get().getAnalysis().forEach(value -> {
+                    if (value.getUuid().equals(analysis.getUuid()))
+                        value.setStatus(true);
+                });
 
-                    if(findSession.isPresent()) {
-                        findSession.get().getBasicRemote().sendObject(outMessage);
-                    }
+                Optional<Session> findSession = sessions.stream().filter(session -> session.getId().equals(findUser.get().getConnectID())).findFirst();
+
+                if(findSession.isPresent()) {
+                    findSession.get().getBasicRemote().sendObject(outMessage);
+                }
 
             } else {
+
+
+
+//                findUser.get().getAnalysis().forEach(value -> {
+//                    if (value.getUuid().equals(analysis.getUuid()))
+//                        value.setStatus(true);
+//                });
+//
+//                Optional<Session> findSession = sessions.stream().filter(session -> session.getId().equals(findUser.get().getConnectID())).findFirst();
+//
+//                if(findSession.isPresent()) {
+//                    findSession.get().getBasicRemote().sendObject(outMessage);
+//                }
+
                 DUserConnect userConnect = new DUserConnect();
                 userConnect.setUserLogin(login);
                 userConnect.getAnalysis().add(analysis);
                 userConnects.add(userConnect);
             }
 
-            fileUtils.saveUserConnect(jsonb.toJson(userConnects));
+            userConnections.saveUserConnect(jsonb.toJson(userConnects));
 
 //            Runnable task = new Runnable() {
 //                public void run() {
@@ -182,4 +135,6 @@ public class WebSocket {
             System.out.println("Ошибка при отправке сообщения WebSocket: " + e.getMessage());
         }
     }
+
+
 }

@@ -2,14 +2,20 @@ package org.example.model.utils;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import jakarta.websocket.Session;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.data.mydata.DReport;
 import org.example.data.mydata.DUserConnect;
 import org.example.model.properties.ServerProperties;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.Optional;
 
 public class FileUtils implements IFileUtils{
 
@@ -68,6 +74,18 @@ public class FileUtils implements IFileUtils{
         try {
 
             Jsonb jsonb = JsonbBuilder.create();
+
+            File file = new File(docPath + ".json");
+            if (!file.exists()) {
+                if (! file.createNewFile()) throw new Exception("Ошибка при чтении Report файла");
+
+                PrintWriter out = new PrintWriter(new FileWriter(file));
+
+                out.write("[]");
+                out.flush();
+                out.close();
+            }
+
             FileInputStream jsonFile = new FileInputStream(docPath + ".json");
             String jsonText = new String(jsonFile.readAllBytes());
 
@@ -82,52 +100,58 @@ public class FileUtils implements IFileUtils{
     }
 
     @Override
-    public ArrayList<DUserConnect> getUserConnect() throws  Exception {
+    public void logs(String text) throws Exception {
         try {
+            String logs = ServerProperties.getProperty("fileLogPath");
 
-            Jsonb jsonb = JsonbBuilder.create();
-            String path = ServerProperties.getProperty("filepath");
-            String fileName = ServerProperties.getProperty("connectFileName");
-
-            File file = new File(path + "/" + fileName);
+            File file = new File(logs+"/ServerLog.txt");
             if (!file.exists()) {
-                if (! writeFile("[]",path + "/" + fileName)) throw new Exception("Ошибка при работе с файлом: " + fileName);
+                if (!file.createNewFile()) throw new Exception("Ошибка при работе с log файлом: " + logs);
             }
 
-            FileInputStream jsonFile = new FileInputStream(path + "/" + fileName);
+            PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8), true);
 
-            String jsonText = new String(jsonFile.readAllBytes());
+            SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+            String date = formatter.format(new Date());
 
-            jsonFile.close();
-
-            DUserConnect[] userConnects = jsonb.fromJson(jsonText, DUserConnect[].class);
-
-            return new ArrayList<>(Arrays.asList(userConnects));
-        } catch (Exception e){
-            throw new Exception("Ошибка при чтении JSON файла");
-        }
-    }
-
-    @Override
-    public void saveUserConnect(String userConnectJSON) throws  Exception {
-        try {
-
-            String path = ServerProperties.getProperty("filepath");
-            String fileName = ServerProperties.getProperty("connectFileName");
-
-            File file = new File(path + "/" + fileName);
-            if (!file.exists()) {
-                if (! writeFile("[]",path + "/" + fileName)) throw new Exception("Ошибка при работе с файлом: " + fileName);
-            }
-
-            PrintWriter out = new PrintWriter(new FileWriter(file));
-
-            out.write(userConnectJSON);
-            out.flush();
+            out.write("["+date+"]: " + text);
             out.close();
-
         } catch (Exception e){
-            throw new Exception("Ошибка при чтении JSON файла");
+            throw new Exception("Ошибка при работе с logs файлом");
         }
     }
+
+
+
+//    @OnMessage
+//    public void onMessage(Session session, InMessage inMessage) {
+//
+//        OutMessage outMessage = new OutMessage();
+//
+//        outMessage.setLogin(inMessage.getLogin());
+//
+//
+//        try {
+//
+//        } catch (Exception e){
+//            System.out.println(" ");
+//        }
+//        new FileUtils().getUserConnect();
+//
+//        OutMessage outMessage = new OutMessage();
+//
+//        outMessage.setLogin(inMessage.getLogin());
+//        outMessage.setType("MSG");
+//        outMessage.setMessage("Test MSG");
+//
+//        for(Session sess : sessions){
+//            try {
+//                sess.getBasicRemote().sendObject(outMessage);
+//            } catch (Exception e) {
+//                System.out.println("Ошибка сообщений WebSocket: " + e.getMessage());
+//            }
+//        }
+//    }
+
+
 }

@@ -176,10 +176,12 @@ public class DocXLS implements IDocReader {
         outSheet.getRow(0).createCell(colLast + 1).setCellValue("Вероятность");
         outSheet.getRow(0).createCell(colLast + 2).setCellValue("Обновить");
         outSheet.getRow(0).createCell(colLast + 3).setCellValue("Отчет");
+        outSheet.getRow(0).createCell(colLast + 4).setCellValue("Тип");
 
         for (int rowNum = 1; rowNum <= rowLast; ++rowNum){
             outSheet.getRow(rowNum).createCell(colLast + 2).setCellValue("false");
             outSheet.getRow(rowNum).createCell(colLast + 3).setCellValue("false");
+            outSheet.getRow(rowNum).createCell(colLast + 4).setCellValue("0");
         }
 
         File customDir = new File(savePath);
@@ -201,6 +203,47 @@ public class DocXLS implements IDocReader {
     }
 
     @Override
+    public void setDataAnalysis(Object data, String docPath) throws Exception {
+        try {
+
+            FileInputStream file = new FileInputStream(docPath);
+            Workbook workbook = new XSSFWorkbook(file);
+
+            Sheet sheet = workbook.getSheetAt(0);
+
+            DAnalysisResult analysisResults = (DAnalysisResult) data;
+
+
+            for (DAnalysisResult.AnalysisRows result: analysisResults.getComments()){
+                Row row = sheet.getRow(result.getNumber()+1);
+
+                Cell cell = row.getCell(row.getLastCellNum()-4, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                if (cell == null)
+                    row.createCell(row.getLastCellNum()-4).setCellValue(String.valueOf(result.getPercent()));
+                else
+                    cell.setCellValue(String.valueOf(result.getPercent()));
+
+                cell = row.getCell(row.getLastCellNum()-1, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                if (cell == null)
+                    row.createCell(row.getLastCellNum()-1).setCellValue(String.valueOf(result.getClass_comment()));
+                else
+                    cell.setCellValue(String.valueOf(result.getClass_comment()));
+
+            }
+
+            if (! fileUtils.writeFile(workbook, docPath)) {
+                throw new Exception("Ошибка при сохранении файла");
+            }
+
+            workbook.close();
+            file.close();
+
+        } catch (Exception e){
+            throw new Exception("Ошибка при изменении файла");
+        }
+    }
+
+    @Override
     public void updateDoc(String docPath, String docData, String userID) throws Exception {
         try {
 
@@ -214,29 +257,36 @@ public class DocXLS implements IDocReader {
 
             ArrayList<DReport> reports = fileUtils.getReportFile(docPath);
 
+            Row row = sheet.getRow(Integer.parseInt(data.getIndex()));
 
-                Row row = sheet.getRow(Integer.parseInt(data.getIndex()));
+            int colLast = row.getLastCellNum()-1;
 
-                int colLast = row.getLastCellNum()-1;
 
-                if (data.getType().equals("report")) {
-                    row.getCell(colLast).setCellValue(data.getSelect());
 
+            if (data.getType().equals("report")) {
+                row.getCell(colLast-1).setCellValue(data.getSelect());
+
+                Optional<DReport> report = reports.stream().filter(dReport -> dReport.getRowNum().equals(data.getIndex())).findFirst();
+
+                if (report.isPresent()){
+                    report.get().setMessage(data.getMessage());
+                } else {
                     DReport dReport = new DReport();
                     dReport.setRowNum(data.getIndex());
                     dReport.setUserID(userID);
                     dReport.setMessage(data.getMessage());
 
                     reports.add(dReport);
-
-                    if (! fileUtils.writeFile(jsonb.toJson(reports), docPath+".json")) {
-                        throw new Exception("Ошибка при сохранении файла");
-                    }
                 }
-                if (data.getType().equals("update"))
-                    row.getCell((colLast - 1)).setCellValue(data.getSelect());
 
 
+                if (! fileUtils.writeFile(jsonb.toJson(reports), docPath+".json")) {
+                    throw new Exception("Ошибка при сохранении файла");
+                }
+            }
+
+            if (data.getType().equals("update"))
+                row.getCell((colLast - 2)).setCellValue(data.getSelect());
 
             if (! fileUtils.writeFile(workbook, docPath)) {
                 throw new Exception("Ошибка при сохранении файла");
@@ -260,13 +310,14 @@ public class DocXLS implements IDocReader {
 
             Map<Integer, ArrayList<String>> rows = new HashMap<>();
             ArrayList<String> title = new ArrayList<>();
+            Map<Integer, String> type = new HashMap<>();
 
             int i = 0;
             for (Row row : sheet) {
                 ++i;
 
                 if (i == 1) {
-                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                    for (int cellNum=0; cellNum<row.getLastCellNum()-1; ++cellNum) {
                         Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                         if (cell == null)
                             title.add("");
@@ -275,19 +326,25 @@ public class DocXLS implements IDocReader {
                     }
                 } else {
                     rows.put(i, new ArrayList<>());
-                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                    for (int cellNum=0; cellNum<row.getLastCellNum()-1; ++cellNum) {
                         Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                         if (cell == null)
                             rows.get(i).add("");
                         else
                             rows.get(i).add(cell.getStringCellValue());
                     }
+
+                    Cell cell = row.getCell(row.getLastCellNum()-1, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    if (cell == null)
+                        type.put(i, "0");
+                    else
+                        type.put(i, cell.getStringCellValue());
                 }
             }
 
             file.close();
 
-            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title)) ;
+            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title, type)) ;
 
         }catch (Exception e){
             System.out.println("Ошибка при разборе Excel: " + e.getMessage());
@@ -308,7 +365,7 @@ public class DocXLS implements IDocReader {
 
             ArrayList<Map<String, Object>> rows = new ArrayList<>();
 
-            if (column > sheet.getRow(1).getLastCellNum() - 4) {
+            if (column > sheet.getRow(1).getLastCellNum() - 5) {
                 throw new Exception("Ошибка при разборе Excel: указанный столбец отсутствует");
             }
 
@@ -357,6 +414,7 @@ public class DocXLS implements IDocReader {
 
             Map<Integer, ArrayList<String>> rows = new HashMap<>();
             ArrayList<String> title = new ArrayList<>();
+            Map<Integer, String> type = new HashMap<>();
 
             int i = 0;
             for (Row row : sheet) {
@@ -365,7 +423,7 @@ public class DocXLS implements IDocReader {
 
                 if (i > start + number - 1) break;
                 if (i == 1) {
-                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+                    for (int cellNum=0; cellNum<row.getLastCellNum()-1; ++cellNum) {
                         Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                         if (cell == null)
                             title.add("");
@@ -377,19 +435,28 @@ public class DocXLS implements IDocReader {
                         continue;
 
                     rows.put(i, new ArrayList<>());
-                    for (int cellNum=0; cellNum<row.getLastCellNum(); ++cellNum) {
+
+
+                    for (int cellNum=0; cellNum<row.getLastCellNum()-1; ++cellNum) {
                         Cell cell = row.getCell(cellNum, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
                         if (cell == null)
                             rows.get(i).add("");
                         else
                             rows.get(i).add(cell.getStringCellValue());
                     }
+
+
+                    Cell cell = row.getCell(row.getLastCellNum()-1, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    if (cell == null)
+                        type.put(i, "0");
+                    else
+                        type.put(i, cell.getStringCellValue());
                 }
             }
 
             file.close();
 
-            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title)) ;
+            return JsonbBuilder.create().toJson(new DExcel(sheet.getPhysicalNumberOfRows(), rows, title, type)) ;
 
         }catch (Exception e){
             System.out.println("Ошибка при разборе Excel: " + e.getMessage());

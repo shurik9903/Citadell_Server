@@ -5,6 +5,15 @@ public class DReport {
     private String rowNum;
     private String userID;
     private String message;
+    private int type;
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
 
     public String getRowNum() {
         return rowNum;

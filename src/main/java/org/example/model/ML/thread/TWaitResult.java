@@ -7,6 +7,9 @@ import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.controller.WebSocket.WebSocket;
 import org.example.controller.request.RequestBuilder;
 import org.example.data.mydata.DUserConnect;
+import org.example.model.utils.FileUtils;
+import org.example.model.utils.IFileUtils;
+
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +20,8 @@ public class TWaitResult implements Runnable {
     private final String uuid;
     private final String filename;
     private final String user;
-    private String message;
+    private String message = "";
+    private IFileUtils fileUtils = new FileUtils();
 
     public TWaitResult(String threadName, String uuid, String fileName, String user) {
         thread = new Thread(this, threadName);
@@ -33,10 +37,14 @@ public class TWaitResult implements Runnable {
     public void run() {
         try {
             while (call()) {
-                Thread.sleep(60000);
+                Thread.sleep(5000);
             }
             if (!message.isEmpty()){
-                System.out.println(message);
+                try {
+                    fileUtils.logs(message);
+                } catch (Exception e){
+                    System.out.println(message);
+                }
             }
         } catch (InterruptedException e) {
             System.out.println("|Ошибка потока " + thread.getName() + ": " + e.getMessage());
@@ -55,12 +63,14 @@ public class TWaitResult implements Runnable {
                 return false;
             }
 
-            RequestBuilder request = new RequestBuilder(RequestBuilder.Method.POST, "api/v1/predict/result/" + uuid);
+            RequestBuilder request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/predict/status/" + uuid);
 
             String result = request.send();
 
+            System.out.println("Wait Result: " + result);
+
             if (request.responseCode != 200) {
-                text = "|Ошибка потока " + thread.getName() + ": Ошибка при обращении к серверу ML" + request.responseCode + "\n" + result;
+                text = "|Ошибка потока " + thread.getName() + ": Ошибка при обращении к серверу ML " + request.responseCode + "\n" + result;
                 System.out.println(text);
                 message = text;
                 return false;
@@ -70,18 +80,16 @@ public class TWaitResult implements Runnable {
             Map<String, String> data = new HashMap<>();
             data = (Map<String, String>) jsonb.fromJson(result, data.getClass());
 
-            String info = data.getOrDefault("message", "");
+            String info = data.getOrDefault("Message", "");
 
             if (info.isEmpty()){
-                text = "|Ошибка потока " + thread.getName() + ": Ошибка при обработке данных сервера ML" + request.responseCode + "\n" + result;
+                text = "|Ошибка потока " + thread.getName() + ": Ошибка при обработке данных сервера ML " + request.responseCode + "\n" + result;
                 System.out.println(text);
                 message = text;
                 return false;
             }
 
-            System.out.println("info " + info);
-
-            if (info.equals("true")) {
+            if (info.equals("Finish")) {
                 OutMessage outMessage = new OutMessage();
                 outMessage.setLogin(user);
                 outMessage.setType("FileResult");
@@ -95,8 +103,8 @@ public class TWaitResult implements Runnable {
                 analysis.setUuid(uuid);
                 analysis.setFileName(filename);
                 analysis.setStatus(false);
-
                 new WebSocket().sendResultMessage(outMessage, user, analysis);
+                return false;
             }
 
             return true;

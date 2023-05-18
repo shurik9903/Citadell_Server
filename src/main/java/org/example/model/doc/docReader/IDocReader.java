@@ -9,6 +9,7 @@ public interface IDocReader {
     void setDoc(String data);
 
     void saveFile(String savePath) throws Exception;
+    void setDataAnalysis(Object data, String docPath) throws Exception;
 
     void updateDoc(String docPath, String docData, String userID) throws Exception;
 

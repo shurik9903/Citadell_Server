@@ -7,7 +7,17 @@ public class DDocData {
     private String index;
     private String select;
     private String message;
+    private String classComment;
 
+
+
+    public String getClassComment() {
+        return classComment;
+    }
+
+    public void setClassComment(String classComment) {
+        this.classComment = classComment;
+    }
 
     public String getType() {
         return type;
