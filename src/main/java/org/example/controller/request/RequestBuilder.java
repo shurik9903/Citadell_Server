@@ -4,10 +4,7 @@ import jakarta.json.bind.JsonbBuilder;
 import okhttp3.*;
 import org.example.model.properties.ServerProperties;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+
 import java.net.*;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -15,17 +12,17 @@ import java.util.Map;
 
 public class RequestBuilder {
 
-    private final String IP = ServerProperties.getProperty("ML_IP");
-    private final String PORT = ServerProperties.getProperty("ML_PORT");
-
-    private final OkHttpClient httpClient = new OkHttpClient();
-
     public enum Method {
         GET,
         POST,
         PUT,
         DELETE
     }
+
+    private final String IP = ServerProperties.getProperty("ML_IP");
+    private final String PORT = ServerProperties.getProperty("ML_PORT");
+
+    private final OkHttpClient httpClient = new OkHttpClient();
 
     private final Method method;
     private final String address;

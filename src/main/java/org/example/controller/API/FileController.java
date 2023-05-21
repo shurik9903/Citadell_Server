@@ -3,7 +3,6 @@ package org.example.controller.API;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.example.model.doc.IDoc;
 import org.example.model.token.TokenRequired;
 import org.example.model.workingFiles.IWorkingFiles;
 

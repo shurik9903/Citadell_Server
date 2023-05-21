@@ -5,8 +5,6 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.entity.EFile;
 import org.example.data.entity.EReport;
 import org.example.data.mydata.DReport;
@@ -18,8 +16,6 @@ import org.example.model.utils.IFileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +24,7 @@ import java.util.stream.Collectors;
 public class WorkingFiles implements IWorkingFiles {
 
     @Inject
-    private IDataBaseWork DataBaseWork;
+    private IDataBaseWork dataBaseWork;
 
     @Inject
     private IFileUtils fileUtils;
@@ -50,7 +46,7 @@ public class WorkingFiles implements IWorkingFiles {
             docReader.setDoc(document);
             docReader.saveFile(ServerProperties.getProperty("filepath") + File.separator + userLogin);
 
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -59,7 +55,7 @@ public class WorkingFiles implements IWorkingFiles {
             FileInputStream input = new FileInputStream(fileDownload);
 
             MutableBoolean replace = new MutableBoolean(false);
-            Result.put("Msg", DataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
+            Result.put("Msg", dataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
             Result.put("Replace", replace.toString());
 
             input.close();
@@ -72,23 +68,23 @@ public class WorkingFiles implements IWorkingFiles {
     }
 
     @Override
-    public Response overwriteFile(String doc_name, String userid, String userLogin){
+    public Response overwriteFile(String docName, String userid, String userLogin){
 
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            String docPath = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + doc_name;
+            String docPath = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + docName;
 
             File fileDownload = new File(docPath);
             FileInputStream input = new FileInputStream(fileDownload);
 
-            String msg = DataBaseWork.overwriteFile(doc_name, input.readAllBytes(), userid);
+            String msg = dataBaseWork.overwriteFile(docName, input.readAllBytes(), userid);
 
             if (!msg.equals("")) {
                 Result.put("Msg", msg);
@@ -98,7 +94,7 @@ public class WorkingFiles implements IWorkingFiles {
             ArrayList<DReport> reports = fileUtils.getReportFile(docPath);
 
             if (!reports.isEmpty())
-                msg = DataBaseWork.saveReports(doc_name, userid, reports);
+                msg = dataBaseWork.saveReports(docName, userid, reports);
 
             if (!msg.equals("")) {
                 Result.put("Msg", msg);
@@ -163,12 +159,12 @@ public class WorkingFiles implements IWorkingFiles {
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            EFile eFile = DataBaseWork.loadFile(docName, userid);
+            EFile eFile = dataBaseWork.loadFile(docName, userid);
             if (eFile.getMsg() != null) {
                 Result.put("Msg", eFile.getMsg());
                 return Response.ok(jsonb.toJson(Result)).build();
@@ -182,7 +178,7 @@ public class WorkingFiles implements IWorkingFiles {
             }
 
             StringBuilder msg = new StringBuilder();
-            ArrayList<EReport> eReports = DataBaseWork.loadReports(docName, userid, msg);
+            ArrayList<EReport> eReports = dataBaseWork.loadReports(docName, userid, msg);
 
             if (!msg.isEmpty()){
                 Result.put("Msg", msg.toString());

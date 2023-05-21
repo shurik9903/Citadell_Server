@@ -17,10 +17,10 @@ public class Login implements ILogin {
     private IToken token;
 
     @Inject
-    private IDataBaseWork DataBaseWork;
+    private IDataBaseWork dataBaseWork;
 
     @Override
-    public Response LoginFunc(String jsonData) {
+    public Response loginFunc(String jsonData) {
 
         Jsonb jsonb = JsonbBuilder.create();
 
@@ -40,12 +40,12 @@ public class Login implements ILogin {
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
-            ELogin eLogin = DataBaseWork.login(login, password);
+            ELogin eLogin = dataBaseWork.login(login, password);
 
             if (eLogin.getMsg() != null) {
                 Result.put("Msg", eLogin.getMsg());

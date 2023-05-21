@@ -27,8 +27,8 @@ import java.util.Set;
 )
 public class WebSocket {
 
-    private static Set<Session> sessions = new HashSet<>();
-    private IUserConnections userConnections = new UserConnections();
+    private static final Set<Session> sessions = new HashSet<>();
+    private final IUserConnections userConnections = new UserConnections();
 
     @OnOpen
     public void onOpen(Session session, @PathParam("login") String login) {

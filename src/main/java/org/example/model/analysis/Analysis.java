@@ -28,46 +28,10 @@ import java.util.stream.Collectors;
 public class Analysis implements IAnalysis {
 
     @Inject
-    private IDataBaseWork DataBaseWork;
-
-    @Inject
     private IUserConnections userConnections;
 
     @Inject
     private IFileUtils fileUtils;
-
-//    @Override
-//    public Response loadAnalysis(String docid){
-//        Jsonb jsonb = JsonbBuilder.create();
-//        Map<String, String> Result = new HashMap<>();
-//
-//
-//        try {
-//            if (!DataBaseWork.ping()) {
-//                Result.put("Msg", "Нет соединения с базой данных");
-//                return Response.ok(jsonb.toJson(Result)).build();
-//            }
-//
-//            OutMessage outMessage = new OutMessage();
-//            outMessage.setType("MSG");
-//            outMessage.setMessage("ID TEST");
-//
-//            new WebSocket().sendMessage(outMessage);
-//
-//            int min = 0;
-//            int max = 100;
-//
-//            Result.put("id_file", Integer.toString(new Random().nextInt((max - min) + 1) + min));
-//            Result.put("Msg", "");
-//
-//            return Response.ok(jsonb.toJson(Result)).build();
-//
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
-//        }
-//
-//    }
 
     @Override
     public Response startAnalysis(String json, String userLogin, String userID){

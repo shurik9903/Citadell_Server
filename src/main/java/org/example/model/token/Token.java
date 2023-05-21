@@ -11,10 +11,10 @@ import java.util.Map;
 public class Token implements IToken {
 
     @Override
-    public String create(String login, String teacher, String userID){
+    public String create(String login, String admin, String userID){
         ITokenKey tokenKey = new TokenKey();
         ITokenIssuer tokenIssuer = new TokenIssuer(tokenKey.getKey());
-        return tokenIssuer.issueToken(login, teacher, userID);
+        return tokenIssuer.issueToken(login, admin, userID);
     }
 
     @Override

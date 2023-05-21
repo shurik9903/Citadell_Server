@@ -15,12 +15,12 @@ public class TokenIssuer implements ITokenIssuer{
     }
 
     @Override
-    public String issueToken(String username, String admin, String userID) {
+    public String issueToken(String userName, String admin, String userID) {
 
         return Jwts.builder()
                 .setSubject(
                     "{" +
-                        "\"login\":\""+ username +"\"," +
+                        "\"login\":\""+ userName +"\"," +
                         "\"admin\":\""+ admin +"\"," +
                         "\"userID\":\""+ userID +"\"" +
                     "}")

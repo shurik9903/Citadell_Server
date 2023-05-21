@@ -10,7 +10,6 @@ public class DDocData {
     private String classComment;
 
 
-
     public String getClassComment() {
         return classComment;
     }

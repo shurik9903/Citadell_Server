@@ -16,7 +16,7 @@ public class LoginController {
     @Produces("application/json; charset=UTF-8")
     public Response doPost(String jsonData) {
         try {
-            return log.LoginFunc(jsonData);
+            return log.loginFunc(jsonData);
         } catch (Exception e) {
             System.out.println("|Ошибка: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();

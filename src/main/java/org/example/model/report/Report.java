@@ -4,16 +4,12 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
-import org.example.data.mydata.DDocData;
 import org.example.data.mydata.DReport;
 import org.example.model.database.IDataBaseWork;
-import org.example.model.doc.docReader.DocReaderFactory;
-import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
 import org.example.model.utils.IFileUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +17,7 @@ import java.util.Map;
 public class Report implements IReport{
 
     @Inject
-    private IDataBaseWork DataBaseWork;
+    private IDataBaseWork dataBaseWork;
 
     @Inject
     private IFileUtils fileUtils;
@@ -32,7 +28,7 @@ public class Report implements IReport{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }

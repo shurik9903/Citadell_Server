@@ -3,7 +3,6 @@ package org.example.controller.API;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.example.model.ML.predict.IPredict;
 import org.example.model.analysis.IAnalysis;
 import org.example.model.token.*;
 
@@ -16,7 +15,7 @@ public class AnalysisController {
     @POST
     @Produces("application/json; charset=UTF-8")
     @TokenRequired
-    public Response doGet(String document, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
+    public Response doPost(String document, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
         try {
             return analysis.startAnalysis(document, userLogin, userID);
         } catch (Exception e) {

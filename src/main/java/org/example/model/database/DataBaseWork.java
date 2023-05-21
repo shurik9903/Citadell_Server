@@ -30,7 +30,7 @@ public class DataBaseWork implements IDataBaseWork {
     }
 
     @Resource
-    private UserTransaction Transaction;
+    private UserTransaction transaction;
 
     @Override
     public ELogin login(String login, String password) {
@@ -42,7 +42,7 @@ public class DataBaseWork implements IDataBaseWork {
                 return new ELogin("Ошибка при инициализации Entity Manager");
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from users where BINARY login = ? and BINARY password = ?", ELogin.class);
@@ -51,12 +51,12 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(2, password);
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 return new ELogin("Неверный логин или пароль");
             }
 
             ELogin eLogin = (ELogin) query.getSingleResult();
-            Transaction.commit();
+            transaction.commit();
 
             return eLogin;
 
@@ -79,7 +79,7 @@ public class DataBaseWork implements IDataBaseWork {
                 return "Ошибка при инициализации Entity Manager";
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
@@ -89,7 +89,7 @@ public class DataBaseWork implements IDataBaseWork {
 
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 return "Файл с таким именем не найден";
             }
 
@@ -119,7 +119,7 @@ public class DataBaseWork implements IDataBaseWork {
                 }
             }
 
-            Transaction.commit();
+            transaction.commit();
             return "";
 
         } catch (Exception e) {
@@ -141,7 +141,7 @@ public class DataBaseWork implements IDataBaseWork {
                 msg.append("Ошибка при инициализации Entity Manager");
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
@@ -151,7 +151,7 @@ public class DataBaseWork implements IDataBaseWork {
 
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 msg.append("Файл с таким именем не найден");
             }
 
@@ -162,14 +162,14 @@ public class DataBaseWork implements IDataBaseWork {
                         .setParameter(2, eFile.getFile_id());
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 return null;
             }
 
             List<EReport> eReports = query.getResultList();
 
 
-            Transaction.commit();
+            transaction.commit();
             return new ArrayList<>(eReports);
 
         } catch (Exception e) {
@@ -192,7 +192,7 @@ public class DataBaseWork implements IDataBaseWork {
                 return "Ошибка при инициализации Entity Manager";
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
@@ -201,7 +201,7 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(2, userID);
 
             if (query.getResultList().size() != 0) {
-                Transaction.commit();
+                transaction.commit();
                 replace.setTrue();
                 return "";
             }
@@ -212,7 +212,7 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(3, userID)
                     .executeUpdate();
 
-            Transaction.commit();
+            transaction.commit();
             return "";
 
         } catch (Exception e) {
@@ -236,7 +236,7 @@ public class DataBaseWork implements IDataBaseWork {
                 return "Ошибка при инициализации Entity Manager";
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
@@ -245,7 +245,7 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(2, userID);
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 return "Файл с таким именем не найден";
             }
 
@@ -258,7 +258,7 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(4, eFile.getFile_id())
                     .executeUpdate();
 
-            Transaction.commit();
+            transaction.commit();
             return "";
 
         } catch (Exception e) {
@@ -281,14 +281,14 @@ public class DataBaseWork implements IDataBaseWork {
                 return null;
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where userid = ?", ENameFiles.class);
             query.setParameter(1, userID);
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
 
                 msg.append("Файл с таким именем не найден");
                 return null;
@@ -296,7 +296,7 @@ public class DataBaseWork implements IDataBaseWork {
 
             List<ENameFiles> eFile = query.getResultList();
 
-            Transaction.commit();
+            transaction.commit();
             return new ArrayList<>(eFile);
 
 
@@ -324,7 +324,7 @@ public class DataBaseWork implements IDataBaseWork {
                 return new EFile("Ошибка при инициализации Entity Manager");
             }
 
-            Transaction.begin();
+            transaction.begin();
             entityManager.joinTransaction();
 
             Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
@@ -333,13 +333,13 @@ public class DataBaseWork implements IDataBaseWork {
                     .setParameter(2, userID);
 
             if (query.getResultList().size() == 0) {
-                Transaction.commit();
+                transaction.commit();
                 return new EFile("Файл с таким именем не найден");
             }
 
             EFile eFile = (EFile) query.getSingleResult();
 
-            Transaction.commit();
+            transaction.commit();
             return eFile;
 
 

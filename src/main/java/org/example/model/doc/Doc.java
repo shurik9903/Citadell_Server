@@ -4,16 +4,12 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.example.data.entity.ENameFiles;
-import org.example.data.entity.EFile;
-import org.example.data.mydata.DDocData;
 import org.example.data.mydata.DExcel;
 import org.example.model.database.IDataBaseWork;
 import org.example.model.doc.docReader.DocReaderFactory;
@@ -21,17 +17,15 @@ import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
 import org.example.model.utils.IFileUtils;
 import org.example.model.workingFiles.IWorkingFiles;
-import org.example.model.workingFiles.WorkingFiles;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.file.Files;
 import java.util.*;
 
 public class Doc implements IDoc{
 
     @Inject
-    private IDataBaseWork DataBaseWork;
+    private IDataBaseWork dataBaseWork;
 
     @Inject
     private IFileUtils fileUtils;
@@ -45,7 +39,7 @@ public class Doc implements IDoc{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -67,13 +61,13 @@ public class Doc implements IDoc{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
 
             StringBuilder msg = new StringBuilder();
-            ArrayList<ENameFiles> eNameFiles = DataBaseWork.allFiles(userID, msg);
+            ArrayList<ENameFiles> eNameFiles = dataBaseWork.allFiles(userID, msg);
 
             if (!msg.isEmpty()){
                 Result.put("Msg", msg.toString());
@@ -97,7 +91,7 @@ public class Doc implements IDoc{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
@@ -163,7 +157,7 @@ public class Doc implements IDoc{
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!DataBaseWork.ping()) {
+            if (!dataBaseWork.ping()) {
                 Result.put("Msg", "Нет соединения с базой данных");
                 return Response.ok(jsonb.toJson(Result)).build();
             }
