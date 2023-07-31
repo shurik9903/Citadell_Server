@@ -253,22 +253,46 @@ public class DocXLS implements IDocReader {
             Sheet sheet = workbook.getSheetAt(0);
 
             Jsonb jsonb = JsonbBuilder.create();
-            DDocData data = jsonb.fromJson(docData, DDocData.class);
+
+            DDocData dDocData = jsonb.fromJson(docData, DDocData.class);
+
+            if (dDocData.getAllSelect() != null){
+
+                boolean first = true;
+                for (Row row : sheet) {
+                    if (first){
+                        first = false;
+                        continue;
+                    }
+                    int colLast = row.getLastCellNum() - 3;
+                    row.getCell(colLast).setCellValue(dDocData.getAllSelect());
+                }
+
+                if (! fileUtils.writeFile(workbook, docPath)) {
+                    throw new Exception("Ошибка при сохранении файла");
+                }
+
+                workbook.close();
+                file.close();
+
+                return;
+            }
 
             ArrayList<DReport> reports = fileUtils.getReportFile(docPath);
 
+            for(DDocData.Data data : dDocData.getData()){
+
             Row row = sheet.getRow(Integer.parseInt(data.getIndex()));
 
-            int colLast = row.getLastCellNum()-1;
-
-
+            int colLast = row.getLastCellNum() - 1;
 
             if (data.getType().equals("report")) {
-                row.getCell(colLast-1).setCellValue(data.getSelect());
+
+                row.getCell(colLast - 1).setCellValue(data.getSelect());
 
                 Optional<DReport> report = reports.stream().filter(dReport -> dReport.getRowNum().equals(data.getIndex())).findFirst();
 
-                if (report.isPresent()){
+                if (report.isPresent()) {
                     report.get().setMessage(data.getMessage());
                 } else {
                     DReport dReport = new DReport();
@@ -280,13 +304,14 @@ public class DocXLS implements IDocReader {
                 }
 
 
-                if (! fileUtils.writeFile(jsonb.toJson(reports), docPath+".json")) {
+                if (!fileUtils.writeFile(jsonb.toJson(reports), docPath + ".json")) {
                     throw new Exception("Ошибка при сохранении файла");
                 }
             }
 
             if (data.getType().equals("update"))
                 row.getCell((colLast - 2)).setCellValue(data.getSelect());
+        }
 
             if (! fileUtils.writeFile(workbook, docPath)) {
                 throw new Exception("Ошибка при сохранении файла");
@@ -353,8 +378,7 @@ public class DocXLS implements IDocReader {
     }
 
     @Override
-    public ArrayList<Map<String, Object>> parser(String loadPath, int column) throws Exception {
-
+    public ArrayList<Map<String, Object>> parserSelectColumn(String loadPath, int column, int select) throws Exception {
 
         try {
             FileInputStream file = new FileInputStream(loadPath);
@@ -369,6 +393,8 @@ public class DocXLS implements IDocReader {
                 throw new Exception("Ошибка при разборе Excel: указанный столбец отсутствует");
             }
 
+
+
             int i = 0;
             for (Row row : sheet) {
                 ++i;
@@ -376,12 +402,19 @@ public class DocXLS implements IDocReader {
                 if (i == 1)
                     continue;
 
-                Cell cell = row.getCell(column, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-                if (cell != null)
-                    rows.add(new HashMap<>(){{
-                        put("number", row.getRowNum());
-                        put("comment", cell.getStringCellValue());
-                    }});
+                String selectValue = row.getCell(row.getLastCellNum() - 3, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL).getStringCellValue();
+
+                if ( (select == 1) ||
+                        (select == 2 && selectValue.equals("true"))
+                        || (select == 3 && selectValue.equals("false"))){
+                    Cell cell = row.getCell(column, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
+                    if (cell != null)
+                        rows.add(new HashMap<>(){{
+                            put("number", row.getRowNum());
+                            put("comment", cell.getStringCellValue());
+                        }});
+                }
+
             }
 
             file.close();

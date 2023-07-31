@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.controller.WebSocket.WebSocket;
 import org.example.controller.request.RequestBuilder;
+import org.example.data.mydata.DAnalysis;
 import org.example.data.mydata.DAnalysisResult;
 import org.example.data.mydata.DReport;
 import org.example.data.mydata.DUserConnect;
@@ -39,20 +40,20 @@ public class Analysis implements IAnalysis {
             Jsonb jsonb = JsonbBuilder.create();
             Map<String, String> jsonOut = new HashMap<>();
 
-            Map<String, String> data = new HashMap<>();
 
-            data =  (Map<String, String>) jsonb.fromJson(json, data.getClass());
+            DAnalysis analysis =  jsonb.fromJson(json, DAnalysis.class);
 
-            String fileName = data.getOrDefault("name", "");
-            String column = data.getOrDefault("column", "");
 
-            if (fileName.isEmpty() || column.isEmpty()){
+            if (analysis.getName().isEmpty() || analysis.getColumn().isEmpty() || analysis.getSelect().isEmpty()){
                 jsonOut.put("msg", "Ошибка данных, отсутствует название файла или номер столбца");
                 return Response.ok(jsonb.toJson(jsonOut)).build();
             }
 
-            IDocReader docReader = DocReaderFactory.getDocReader(fileName.substring(fileName.lastIndexOf('.')));
-            ArrayList<Map<String, Object>> columns = docReader.parser(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName, Integer.parseInt(column));
+            IDocReader docReader = DocReaderFactory.getDocReader(analysis.getName().substring(analysis.getName().lastIndexOf('.')));
+            ArrayList<Map<String, Object>> columns = docReader.parserSelectColumn(
+                    ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + analysis.getName(),
+                    Integer.parseInt(analysis.getColumn()),
+                    Integer.parseInt(analysis.getSelect()));
 
             Map<Object, Object> predictData = new HashMap<>();
             predictData.put("userID", userID);
@@ -67,6 +68,8 @@ public class Analysis implements IAnalysis {
             if (request.responseCode != 200)
                 return Response.status(request.responseCode).entity(result).build();
 
+            Map<String, String> data = new HashMap<>();
+
             data = (Map<String, String>) jsonb.fromJson(result, data.getClass());
 
             String uuid = data.getOrDefault("UUID", "");
@@ -77,14 +80,14 @@ public class Analysis implements IAnalysis {
                 return Response.ok(jsonb.toJson(jsonOut)).build();
             }
 
-            new TWaitResult(userLogin+"|"+fileName, uuid, fileName, userLogin);
+            new TWaitResult(userLogin+"|"+analysis.getName(), uuid, analysis.getName(), userLogin);
 
 
-            DUserConnect.Analysis analysis = new DUserConnect.Analysis();
-            analysis.setFileName(fileName);
-            analysis.setUuid(uuid);
-            analysis.setStatus(false);
-            subscribeFile(analysis, userLogin);
+            DUserConnect.Analysis userAnalysisData = new DUserConnect.Analysis();
+            userAnalysisData.setFileName(analysis.getName());
+            userAnalysisData.setUuid(uuid);
+            userAnalysisData.setStatus(false);
+            subscribeFile(userAnalysisData, userLogin);
 
             return Response.ok(jsonb.toJson(jsonOut)).build();
 

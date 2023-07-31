@@ -15,7 +15,7 @@ public interface IDocReader {
 
     String parser(String loadPath) throws Exception;
 
-    ArrayList<Map<String, Object>> parser(String loadPath, int column) throws Exception;
+    ArrayList<Map<String, Object>> parserSelectColumn(String loadPath, int column, int select) throws Exception;
 
     String parser(String loadPath, int start, int number) throws Exception;
 }

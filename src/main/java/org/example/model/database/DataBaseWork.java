@@ -21,13 +21,20 @@ import java.util.List;
 
 public class DataBaseWork implements IDataBaseWork {
 
-    //@PersistenceUnit(unitName = "FSBJDBC_PersistenceUnit")
+    //@PersistenceUnit(unitName = "CitadelJDBC_PersistenceUnit")
     private EntityManagerFactory EMF;
+
+//    @PostConstruct
+//    public void PersisInit(){
+//        EMF = Persistence.createEntityManagerFactory("CitadelJDBC_PersistenceUnit");
+//    }
 
     @PostConstruct
     public void PersisInit(){
-        EMF = Persistence.createEntityManagerFactory("FSBJDBC_PersistenceUnit");
+        EMF = Persistence.createEntityManagerFactory("CitadelJDBCPG_PersistenceUnit");
     }
+
+
 
     @Resource
     private UserTransaction transaction;
@@ -45,7 +52,10 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from users where BINARY login = ? and BINARY password = ?", ELogin.class);
+//            Query query = entityManager.createNativeQuery("Select * from users where BINARY login = ? and BINARY password = ?", ELogin.class);
+
+            Query query = entityManager.createNativeQuery("Select * from users where login = ? and password = ?", ELogin.class);
+
 
             query.setParameter(1, login)
                     .setParameter(2, password);
@@ -82,7 +92,8 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?::integer", EFile.class);
 
             query.setParameter(1, fileName)
                     .setParameter(2, userID);
@@ -97,14 +108,16 @@ public class DataBaseWork implements IDataBaseWork {
 
             for (DReport report : reports) {
 
-                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ? and row_num = ?", EReport.class);
+//                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ? and row_num = ?", EReport.class);
+                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ?::integer and table_id = ?::integer and row_num = ?::integer", EReport.class);
                 query.setParameter(1, userID)
                         .setParameter(2, eFile.getFile_id())
                         .setParameter(3, report.getRowNum());
 
 
                 if (query.getResultList().size() == 0) {
-                    query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row_num) values (?, ?, ?, ?)");
+//                    query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row_num) values (?, ?, ?, ?)");
+                    query = entityManager.createNativeQuery("Insert into user_reports (table_id, user_id, message, row_num) values (?::integer, ?::integer, ?, ?::integer)");
                     query.setParameter(1, eFile.getFile_id())
                             .setParameter(2, userID)
                             .setParameter(3, report.getMessage())
@@ -112,7 +125,8 @@ public class DataBaseWork implements IDataBaseWork {
                             .executeUpdate();
                 } else {
                     EReport eReport = (EReport) query.getSingleResult();
-                    query = entityManager.createNativeQuery("Update user_reports set message = ? where id = ?");
+//                    query = entityManager.createNativeQuery("Update user_reports set message = ? where id = ?");
+                    query = entityManager.createNativeQuery("Update user_reports set message = ? where id = ?::integer");
                     query.setParameter(1, report.getMessage())
                             .setParameter(2, eReport.getReportID())
                             .executeUpdate();
@@ -144,7 +158,8 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?::integer", EFile.class);
 
             query.setParameter(1, fileName)
                     .setParameter(2, userID);
@@ -157,14 +172,11 @@ public class DataBaseWork implements IDataBaseWork {
 
             EFile eFile = (EFile) query.getSingleResult();
 
-                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ?", EReport.class);
+//                query = entityManager.createNativeQuery("Select * from user_reports where user_id = ? and table_id = ?", EReport.class);
+            query = entityManager.createNativeQuery("Select * from user_reports where user_id = ?::integer and table_id = ?::integer", EReport.class);
                 query.setParameter(1, userID)
                         .setParameter(2, eFile.getFile_id());
 
-            if (query.getResultList().size() == 0) {
-                transaction.commit();
-                return null;
-            }
 
             List<EReport> eReports = query.getResultList();
 
@@ -195,7 +207,8 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?::integer", EFile.class);
 
             query.setParameter(1, fileName)
                     .setParameter(2, userID);
@@ -206,7 +219,8 @@ public class DataBaseWork implements IDataBaseWork {
                 return "";
             }
 
-            query = entityManager.createNativeQuery("Insert into user_tables (name, file, userid) values (?, ?, ?)");
+//            query = entityManager.createNativeQuery("Insert into user_tables (name, file, userid) values (?, ?, ?)");
+            query = entityManager.createNativeQuery("Insert into user_tables (name, file, userid) values (?, ?, ?::integer)");
             query.setParameter(1, fileName)
                     .setParameter(2, fileByte)
                     .setParameter(3, userID)
@@ -239,7 +253,8 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?::integer", EFile.class);
 
             query.setParameter(1, fileName)
                     .setParameter(2, userID);
@@ -251,7 +266,8 @@ public class DataBaseWork implements IDataBaseWork {
 
             EFile eFile = (EFile) query.getSingleResult();
 
-            query = entityManager.createNativeQuery("Update user_tables set name = ?, file = ?, userid = ? where id = ?");
+//            query = entityManager.createNativeQuery("Update user_tables set name = ?, file = ?, userid = ? where id = ?");
+            query = entityManager.createNativeQuery("Update user_tables set name = ?, file = ?, userid = ?::integer where id = ?::integer");
             query.setParameter(1, fileName)
                     .setParameter(2, fileByte)
                     .setParameter(3, userID)
@@ -284,15 +300,16 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where userid = ?", ENameFiles.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where userid = ?", ENameFiles.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where userid = ?::integer", ENameFiles.class);
             query.setParameter(1, userID);
 
-            if (query.getResultList().size() == 0) {
-                transaction.commit();
-
-                msg.append("Файл с таким именем не найден");
-                return null;
-            }
+//            if (query.getResultList().size() == 0) {
+//                transaction.commit();
+//
+//                msg.append("Файл с таким именем не найден");
+//                return null;
+//            }
 
             List<ENameFiles> eFile = query.getResultList();
 
@@ -327,7 +344,8 @@ public class DataBaseWork implements IDataBaseWork {
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+//            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?", EFile.class);
+            Query query = entityManager.createNativeQuery("Select * from user_tables where name = ? and userid = ?::integer", EFile.class);
 
             query.setParameter(1, fileName)
                     .setParameter(2, userID);

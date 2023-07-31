@@ -2,7 +2,6 @@ package org.example.model.ML.thread;
 
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import jakarta.ws.rs.core.Response;
 import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.controller.WebSocket.WebSocket;
 import org.example.controller.request.RequestBuilder;
@@ -16,9 +15,9 @@ import java.util.Map;
 
 public class TWaitResult implements Runnable {
 
-    private Thread thread;
+    private final Thread thread;
     private final String uuid;
-    private final String filename;
+    private final String fileName;
     private final String user;
     private String message = "";
     private IFileUtils fileUtils = new FileUtils();
@@ -27,7 +26,7 @@ public class TWaitResult implements Runnable {
         thread = new Thread(this, threadName);
 
         this.uuid = uuid;
-        this.filename = fileName;
+        this.fileName = fileName;
         this.user = user;
 
         thread.start();
@@ -95,13 +94,13 @@ public class TWaitResult implements Runnable {
                 outMessage.setType("FileResult");
                 outMessage.setMessage(jsonb.toJson(new HashMap<>(){{
                     put("uuid", uuid);
-                    put("fileName", filename);
+                    put("fileName", fileName);
                 }}));
 
                 DUserConnect.Analysis analysis = new DUserConnect.Analysis();
 
                 analysis.setUuid(uuid);
-                analysis.setFileName(filename);
+                analysis.setFileName(fileName);
                 analysis.setStatus(false);
                 new WebSocket().sendResultMessage(outMessage, user, analysis);
                 return false;

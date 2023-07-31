@@ -27,7 +27,7 @@ public class TokenIssuer implements ITokenIssuer{
                 .claim("scope", "user")
                 .signWith(key, SignatureAlgorithm.HS256)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + (1000 * 60 * 10)))
+                .setExpiration(new Date(new Date().getTime() + (1000 * 60 * 60 * 24)))
                 .compact();
     }
 }
