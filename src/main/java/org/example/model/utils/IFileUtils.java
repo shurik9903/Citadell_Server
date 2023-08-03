@@ -17,4 +17,6 @@ public interface IFileUtils {
     ArrayList<DReport> getReportFile(String docPath) throws Exception;
 
     void logs(String text) throws Exception;
+
+    void deleteFile(String docPath) throws Exception;
 }

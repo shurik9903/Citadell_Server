@@ -121,6 +121,25 @@ public class FileUtils implements IFileUtils{
         }
     }
 
+    @Override
+    public void deleteFile(String docPath) throws Exception {
+        try {
+
+            File file = new File(docPath);
+            File fileJson = new File(docPath + ".json");
+
+            if (file.exists()) {
+                file.delete();
+            }
+
+            if(fileJson.exists()){
+                fileJson.delete();
+            }
+
+        } catch (Exception e){
+            throw new Exception("Ошибка при удалении файла пользователя");
+        }
+    }
 
 
 //    @OnMessage
