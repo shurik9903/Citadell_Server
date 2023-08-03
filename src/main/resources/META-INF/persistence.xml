@@ -3,20 +3,26 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
 http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
 
-  <persistence-unit name = "CitadelJDBC_PersistenceUnit" transaction-type="JTA">
-   <jta-data-source>jdbc/CitadelJDBC</jta-data-source>
-      <class>org.example.data.entity.ELogin</class>
-      <class>org.example.data.entity.EFile</class>
-      <class>org.example.data.entity.ENameFiles</class>
-      <class>org.example.data.entity.EReport</class>
-  </persistence-unit>
+<!--MySQL Database    -->
+<!--  <persistence-unit name = "CitadellJDBC_PersistenceUnit" transaction-type="JTA">-->
+<!--   <jta-data-source>jdbc/CitadellJDBC</jta-data-source>-->
+<!--      <class>org.example.data.entity.ELogin</class>-->
+<!--      <class>org.example.data.entity.EFile</class>-->
+<!--      <class>org.example.data.entity.ENameFiles</class>-->
+<!--      <class>org.example.data.entity.EReport</class>-->
+<!--  </persistence-unit>-->
 
-<persistence-unit name = "CitadelJDBCPG_PersistenceUnit" transaction-type="JTA">
-    <jta-data-source>jdbc/CitadelJDBCPG</jta-data-source>
+
+<!--PostgresSQL Database    -->
+<persistence-unit name = "CitadellJDBCPG_PersistenceUnit" transaction-type="JTA">
+    <jta-data-source>jdbc/CitadellJDBCPG</jta-data-source>
     <class>org.example.data.entity.ELogin</class>
     <class>org.example.data.entity.EFile</class>
     <class>org.example.data.entity.ENameFiles</class>
     <class>org.example.data.entity.EReport</class>
+    <class>org.example.data.entity.ESimpleWord</class>
+    <class>org.example.data.entity.ESpellingVariants</class>
+    <class>org.example.data.entity.ETypeWord</class>
 </persistence-unit>
 
 </persistence>
