@@ -11,8 +11,6 @@ import java.io.Serializable;
 @Table(name = "\"user_tables\"")
 public class EFile implements Serializable {
 
-    private String msg = "";
-
     @Id
     @Column(name = "\"id\"")
     private Integer file_id;
@@ -27,10 +25,6 @@ public class EFile implements Serializable {
     private int file_userid;
 
     public EFile(){}
-
-    public EFile(String msg){
-        this.msg = msg;
-    }
 
     public EFile(String file_name, byte[] file_byte, int file_userid){
         this.file_name = file_name;
@@ -68,14 +62,6 @@ public class EFile implements Serializable {
 
     public void setFile_userid(int file_userid) {
         this.file_userid = file_userid;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
     }
 
 }
