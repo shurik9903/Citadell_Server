@@ -15,7 +15,7 @@ public class Ping {
             return Response.ok("OK").build();
         } catch (Exception e) {
             System.out.println("|Ошибка: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 }

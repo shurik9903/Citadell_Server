@@ -22,33 +22,33 @@ public class ModelsController {
             return models.getModels();
         } catch (Exception e) {
             System.out.println("|Ошибка: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @PUT
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
-    @TokenRequired
+    @TokenRequired(admin = true)
     public Response doPut(String modelID) {
         try {
             return models.setModels(modelID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @DELETE
     @Path("/{model_id}")
     @Produces("application/json; charset=UTF-8")
-    @TokenRequired
+    @TokenRequired(admin = true)
     public Response doDelete(@PathParam("model_id") String modelID) {
         try {
             return models.deleteModels(modelID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

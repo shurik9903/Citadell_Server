@@ -23,13 +23,13 @@ public class DocController {
             }
 
             if (fileName == null || fileName.isEmpty()){
-                return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + "Имя файла не может быть пустым").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Имя файла не может быть пустым").build();
             }
 
             return doc.readDoc(fileName, start, diapason, userID, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -42,7 +42,7 @@ public class DocController {
             return doc.updateDoc(fileName, docData, userLogin, userID);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

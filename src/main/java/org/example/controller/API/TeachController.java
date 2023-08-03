@@ -15,39 +15,39 @@ public class TeachController {
     @GET
     @Path("/status/{uuid}")
     @Produces("application/json; charset=UTF-8")
-    @TokenRequired
+    @TokenRequired(admin = true)
     public Response doGetStatus(@PathParam("uuid") String uuid) {
         try {
             return teach.getTeachStatus(uuid);
         } catch (Exception e) {
             System.out.println("|Ошибка: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @GET
     @Path("/result/{uuid}")
     @Produces("application/json; charset=UTF-8")
-    @TokenRequired
+    @TokenRequired(admin = true)
     public Response doGetResult(@PathParam("uuid") String uuid) {
         try {
             return teach.getTeachResult(uuid);
         } catch (Exception e) {
             System.out.println("|Ошибка: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @POST
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
-    @TokenRequired
+    @TokenRequired(admin = true)
     public Response doPut(String json) {
         try {
             return teach.setTeach(json);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

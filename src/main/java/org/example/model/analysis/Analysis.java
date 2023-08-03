@@ -3,28 +3,20 @@ package org.example.model.analysis;
 import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import jakarta.websocket.Session;
 import jakarta.ws.rs.core.Response;
-import org.example.controller.WebSocket.Message.OutMessage;
-import org.example.controller.WebSocket.WebSocket;
 import org.example.controller.request.RequestBuilder;
 import org.example.data.mydata.DAnalysis;
 import org.example.data.mydata.DAnalysisResult;
-import org.example.data.mydata.DReport;
 import org.example.data.mydata.DUserConnect;
 import org.example.model.ML.thread.TWaitResult;
 import org.example.model.connections.IUserConnections;
-import org.example.model.database.IDataBaseWork;
-import org.example.model.doc.IDoc;
 import org.example.model.doc.docReader.DocReaderFactory;
 import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
-import org.example.model.utils.FileUtils;
 import org.example.model.utils.IFileUtils;
 
 import java.io.File;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Analysis implements IAnalysis {
 
@@ -93,7 +85,7 @@ public class Analysis implements IAnalysis {
 
         } catch (Exception e){
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -118,7 +110,7 @@ public class Analysis implements IAnalysis {
             return Response.ok(result).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -142,13 +134,13 @@ public class Analysis implements IAnalysis {
             String message = data.getMessage();
 
             if (message != null){
-                return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + message).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
             DUserConnect.Analysis analysis = userConnections.getAnalysisFile(uuid, userLogin);
 
             if (analysis == null){
-                return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: файл с данным uuid не найден " + uuid).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("файл с данным uuid не найден " + uuid).build();
             }
 
 
@@ -188,7 +180,7 @@ public class Analysis implements IAnalysis {
             return Response.ok(result).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

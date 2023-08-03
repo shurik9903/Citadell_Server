@@ -32,7 +32,7 @@ public class FileController {
             return file.overwriteFile(fileName, userID, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -44,7 +44,19 @@ public class FileController {
             return file.loadFile(userID, userLogin, fileName);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    @DELETE
+    @Produces("application/json; charset=UTF-8")
+    @TokenRequired
+    public Response doDelete(@QueryParam("name") String fileName, @HeaderParam("X-Authentication-decrypted") String userID, @HeaderParam("login") String userLogin) {
+        try {
+            return file.deleteFile(fileName, userLogin, userID);
+        } catch (Exception e) {
+            System.out.println("|Error: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 

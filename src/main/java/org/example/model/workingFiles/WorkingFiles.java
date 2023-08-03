@@ -8,7 +8,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.example.data.entity.EFile;
 import org.example.data.entity.EReport;
 import org.example.data.mydata.DReport;
-import org.example.model.database.IDataBaseWork;
+import org.example.model.database.fileWork.IDBFileWork;
+import org.example.model.database.reportWork.IDBReportWork;
 import org.example.model.doc.docReader.DocReaderFactory;
 import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
@@ -24,7 +25,10 @@ import java.util.stream.Collectors;
 public class WorkingFiles implements IWorkingFiles {
 
     @Inject
-    private IDataBaseWork dataBaseWork;
+    private IDBFileWork dataBaseFileWork;
+
+    @Inject
+    private IDBReportWork dataBaseReportWork;
 
     @Inject
     private IFileUtils fileUtils;
@@ -46,16 +50,13 @@ public class WorkingFiles implements IWorkingFiles {
             docReader.setDoc(document);
             docReader.saveFile(ServerProperties.getProperty("filepath") + File.separator + userLogin);
 
-            if (!dataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            dataBaseFileWork.ping();
 
             File fileDownload = new File(ServerProperties.getProperty("filepath") + File.separator + userLogin  + File.separator + docReader.getFullName());
             FileInputStream input = new FileInputStream(fileDownload);
 
             MutableBoolean replace = new MutableBoolean(false);
-            Result.put("Msg", dataBaseWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace));
+            dataBaseFileWork.saveFile(docReader.getFullName(), input.readAllBytes(), userID, replace);
             Result.put("Replace", replace.toString());
 
             input.close();
@@ -63,56 +64,44 @@ public class WorkingFiles implements IWorkingFiles {
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка: " + e.getMessage()).build();
         }
     }
 
     @Override
-    public Response overwriteFile(String docName, String userid, String userLogin){
+    public Response overwriteFile(String docName, String userID, String userLogin){
 
         Jsonb jsonb = JsonbBuilder.create();
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!dataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            dataBaseFileWork.ping();
 
             String docPath = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + docName;
 
             File fileDownload = new File(docPath);
             FileInputStream input = new FileInputStream(fileDownload);
 
-            String msg = dataBaseWork.overwriteFile(docName, input.readAllBytes(), userid);
+            dataBaseFileWork.overwriteFile(docName, input.readAllBytes(), userID);
 
-            if (!msg.equals("")) {
-                Result.put("Msg", msg);
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+
 
             ArrayList<DReport> reports = fileUtils.getReportFile(docPath);
 
             if (!reports.isEmpty())
-                msg = dataBaseWork.saveReports(docName, userid, reports);
+                dataBaseReportWork.saveReports(docName, userID, reports);
 
-            if (!msg.equals("")) {
-                Result.put("Msg", msg);
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
-
-            Result.put("Msg", "");
             input.close();
 
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @Override
-    public Response loadFile(String userid, String userLogin, String docName){
+    public Response loadFile(String userID, String userLogin, String docName){
 
 //        Jsonb jsonb = JsonbBuilder.create();
 //        Map<String, String> Result = new HashMap<>();
@@ -159,31 +148,17 @@ public class WorkingFiles implements IWorkingFiles {
         Map<String, String> Result = new HashMap<>();
 
         try {
-            if (!dataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            dataBaseFileWork.ping();
 
-            EFile eFile = dataBaseWork.loadFile(docName, userid);
-            if (eFile.getMsg() != null) {
-                Result.put("Msg", eFile.getMsg());
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            EFile eFile = dataBaseFileWork.loadFile(docName, userID);
 
             String doc_path = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + eFile.getFile_name();
 
             if (! fileUtils.writeFile(eFile.getFile_byte(), doc_path)) {
-                Result.put("Msg", "Ошибка при сохранении файла");
-                return Response.ok(jsonb.toJson(Result)).build();
+                throw new Exception("Ошибка при сохранении файла");
             }
 
-            StringBuilder msg = new StringBuilder();
-            ArrayList<EReport> eReports = dataBaseWork.loadReports(docName, userid, msg);
-
-            if (!msg.isEmpty()){
-                Result.put("Msg", msg.toString());
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            ArrayList<EReport> eReports = dataBaseReportWork.loadReports(docName, userID);
 
             String writeText = "[]";
 
@@ -204,11 +179,38 @@ public class WorkingFiles implements IWorkingFiles {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка при сохранении файла").build();
             }
 
-            Result.put("Msg", "");
             return Response.ok(jsonb.toJson(Result)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+
+    @Override
+    public Response deleteFile(String fileName, String userLogin, String userID) {
+        Jsonb jsonb = JsonbBuilder.create();
+        Map<String, String> Result = new HashMap<>();
+
+        try {
+            dataBaseFileWork.ping();
+
+            String docPath = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName;
+
+            File fileDownload = new File(docPath);
+            FileInputStream input = new FileInputStream(fileDownload);
+
+            dataBaseFileWork.deleteFile(fileName, userID);
+
+            fileUtils.deleteFile(docPath);
+
+            input.close();
+
+            return Response.ok(jsonb.toJson(Result)).build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+
 }

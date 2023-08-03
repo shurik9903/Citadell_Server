@@ -87,7 +87,7 @@ public class Teaching implements ITeaching{
 
         } catch (Exception e){
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 }

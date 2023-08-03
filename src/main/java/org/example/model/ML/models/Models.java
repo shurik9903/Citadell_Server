@@ -40,7 +40,7 @@ public class Models implements IModels {
             return Response.ok(jsonb.toJson(united)).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -71,7 +71,7 @@ public class Models implements IModels {
             return Response.ok(result).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
@@ -98,7 +98,7 @@ public class Models implements IModels {
             return Response.ok(result).build();
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
 
 

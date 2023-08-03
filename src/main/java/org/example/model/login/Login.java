@@ -5,7 +5,7 @@ import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
 import org.example.data.entity.ELogin;
-import org.example.model.database.IDataBaseWork;
+import org.example.model.database.loginWork.IDBLoginWork;
 import org.example.model.token.*;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class Login implements ILogin {
     private IToken token;
 
     @Inject
-    private IDataBaseWork dataBaseWork;
+    private IDBLoginWork dataBase;
 
     @Override
     public Response loginFunc(String jsonData) {
@@ -36,21 +36,12 @@ public class Login implements ILogin {
         try {
 
             if (login.isEmpty() || password.isEmpty()) {
-                Result.put("Msg", "Заполните все поля");
-                return Response.ok(jsonb.toJson(Result)).build();
+                throw new Exception("Заполните все поля");
             }
 
-            if (!dataBaseWork.ping()) {
-                Result.put("Msg", "Нет соединения с базой данных");
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            dataBase.ping();
 
-            ELogin eLogin = dataBaseWork.login(login, password);
-
-            if (eLogin.getMsg() != null) {
-                Result.put("Msg", eLogin.getMsg());
-                return Response.ok(jsonb.toJson(Result)).build();
-            }
+            ELogin eLogin = dataBase.login(login, password);
 
             String newToken = token.create(login, String.valueOf(eLogin.isPermission()), eLogin.getUser_ID().toString());
 

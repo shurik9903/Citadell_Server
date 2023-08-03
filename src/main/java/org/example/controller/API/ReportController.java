@@ -20,13 +20,13 @@ public class ReportController {
         try {
 
             if ((fileName == null || fileName.isEmpty()) && (row == null || row.isEmpty())){
-                return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + "Имя файла/строки не может быть пустым").build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Имя файла/строки не может быть пустым").build();
             }
 
             return report.getReport(fileName, row, userLogin);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
-            return Response.status(Response.Status.BAD_REQUEST).entity("|Ошибка: " + e.getMessage()).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
