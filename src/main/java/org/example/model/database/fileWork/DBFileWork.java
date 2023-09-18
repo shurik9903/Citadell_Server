@@ -28,7 +28,7 @@ public class DBFileWork extends DBConstructor implements IDBFileWork {
             if (query.getResultList().size() != 0) {
                 transaction.commit();
                 replace.setTrue();
-
+                return;
             }
 
             query = entityManager.createNativeQuery("Insert into user_tables (name, file, user_id) values (?, ?, ?::integer)");
@@ -38,7 +38,6 @@ public class DBFileWork extends DBConstructor implements IDBFileWork {
                     .executeUpdate();
 
             transaction.commit();
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new Exception("Ошибка: " + e.getMessage());
@@ -118,6 +117,8 @@ public class DBFileWork extends DBConstructor implements IDBFileWork {
 
     @Override
     public EFile loadFile(String fileName, String userID) throws Exception {
+
+        System.out.println("loadfile");
 
         EntityManager entityManager = null;
         try {
