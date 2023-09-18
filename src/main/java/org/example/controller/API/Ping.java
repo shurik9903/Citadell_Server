@@ -2,8 +2,6 @@ package org.example.controller.API;
 
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import org.example.controller.request.RequestBuilder;
-
 
 @Path("/ping")
 public class Ping {
@@ -18,6 +16,7 @@ public class Ping {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
+
 }
 
 
