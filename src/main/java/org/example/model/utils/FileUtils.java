@@ -1,5 +1,6 @@
 package org.example.model.utils;
 
+import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.websocket.Session;
@@ -7,6 +8,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.example.controller.WebSocket.Message.OutMessage;
 import org.example.data.mydata.DReport;
 import org.example.data.mydata.DUserConnect;
+import org.example.model.connections.IUserConnections;
 import org.example.model.properties.ServerProperties;
 
 import java.io.*;
@@ -140,37 +142,5 @@ public class FileUtils implements IFileUtils{
             throw new Exception("Ошибка при удалении файла пользователя");
         }
     }
-
-
-//    @OnMessage
-//    public void onMessage(Session session, InMessage inMessage) {
-//
-//        OutMessage outMessage = new OutMessage();
-//
-//        outMessage.setLogin(inMessage.getLogin());
-//
-//
-//        try {
-//
-//        } catch (Exception e){
-//            System.out.println(" ");
-//        }
-//        new FileUtils().getUserConnect();
-//
-//        OutMessage outMessage = new OutMessage();
-//
-//        outMessage.setLogin(inMessage.getLogin());
-//        outMessage.setType("MSG");
-//        outMessage.setMessage("Test MSG");
-//
-//        for(Session sess : sessions){
-//            try {
-//                sess.getBasicRemote().sendObject(outMessage);
-//            } catch (Exception e) {
-//                System.out.println("Ошибка сообщений WebSocket: " + e.getMessage());
-//            }
-//        }
-//    }
-
 
 }
