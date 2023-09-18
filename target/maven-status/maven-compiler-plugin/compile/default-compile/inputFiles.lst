@@ -5,6 +5,7 @@ D:\Java project\FSB\src\main\java\org\example\model\ML\teach\Teach.java
 D:\Java project\FSB\src\main\java\org\example\model\token\ITokenKey.java
 D:\Java project\FSB\src\main\java\org\example\model\database\loginWork\IDBLoginWork.java
 D:\Java project\FSB\src\main\java\org\example\data\entity\EFile.java
+D:\Java project\FSB\src\main\java\org\example\model\ML\thread\TWaitResultAnalysis.java
 D:\Java project\FSB\src\main\java\org\example\model\rabbit\Rabbit.java
 D:\Java project\FSB\src\main\java\org\example\data\mydata\DReport.java
 D:\Java project\FSB\src\main\java\org\example\model\database\fileWork\DBFileWork.java
@@ -67,7 +68,6 @@ D:\Java project\FSB\src\main\java\org\example\model\database\dictionaryWork\DBDi
 D:\Java project\FSB\src\main\java\org\example\controller\API\ReportController.java
 D:\Java project\FSB\src\main\java\org\example\model\token\TokenValidator.java
 D:\Java project\FSB\src\main\java\org\example\model\utils\FileUtils.java
-D:\Java project\FSB\src\main\java\org\example\model\ML\thread\TWaitResult.java
 D:\Java project\FSB\src\main\java\org\example\model\rabbit\IRabbit.java
 D:\Java project\FSB\src\main\java\org\example\model\teaching\Teaching.java
 D:\Java project\FSB\src\main\java\org\example\model\messageBroker\MessBrok.java
@@ -79,6 +79,7 @@ D:\Java project\FSB\src\main\java\org\example\model\login\ILogin.java
 D:\Java project\FSB\src\main\java\org\example\data\mydata\DUserConnect.java
 D:\Java project\FSB\src\main\java\org\example\model\login\Login.java
 D:\Java project\FSB\src\main\java\org\example\controller\API\MLPing.java
+D:\Java project\FSB\src\main\java\org\example\model\ML\thread\TWaitDictionaryWordsFind.java
 D:\Java project\FSB\src\main\java\org\example\model\token\TokenKey.java
 D:\Java project\FSB\src\main\java\org\example\model\messageBroker\IMessBrok.java
 D:\Java project\FSB\src\main\java\org\example\model\properties\ServerProperties.java

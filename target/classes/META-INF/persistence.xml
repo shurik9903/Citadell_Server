@@ -23,6 +23,7 @@ http://java.sun.com/xml/ns/persistence/persistence_1_0.xsd">
     <class>org.example.data.entity.ESimpleWord</class>
     <class>org.example.data.entity.ESpellingVariants</class>
     <class>org.example.data.entity.ETypeWord</class>
+
 </persistence-unit>
 
 </persistence>
