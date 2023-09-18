@@ -8,4 +8,6 @@ public interface IModels {
     Response setModels(String data);
 
     Response deleteModels(String id);
+
+    Response updateModel(int modelID, String name);
 }
