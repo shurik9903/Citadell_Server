@@ -30,9 +30,23 @@ public class ModelsController {
     @Consumes("application/json")
     @Produces("application/json; charset=UTF-8")
     @TokenRequired(admin = true)
-    public Response doPut(String modelID) {
+    public Response doPutSelectModel(String modelID) {
         try {
             return models.setModels(modelID);
+        } catch (Exception e) {
+            System.out.println("|Error: " + e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
+    @PUT
+    @Path("/{model_id}")
+    @Consumes("application/json")
+    @Produces("application/json; charset=UTF-8")
+    @TokenRequired(admin = true)
+    public Response doPutUpdateModel(@PathParam("model_id") int modelID, String name) {
+        try {
+            return models.updateModel(modelID, name);
         } catch (Exception e) {
             System.out.println("|Error: " + e);
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();

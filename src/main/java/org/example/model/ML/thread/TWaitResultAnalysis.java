@@ -13,23 +13,23 @@ import org.example.model.utils.IFileUtils;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TWaitResult implements Runnable {
+public class TWaitResultAnalysis implements Runnable {
+
+    public Thread getThread() {
+        return thread;
+    }
 
     private final Thread thread;
     private final String uuid;
-    private final String fileName;
-    private final String user;
+    private final String type;
+
     private String message = "";
-    private IFileUtils fileUtils = new FileUtils();
+    private final IFileUtils fileUtils = new FileUtils();
 
-    public TWaitResult(String threadName, String uuid, String fileName, String user) {
-        thread = new Thread(this, threadName);
-
+    public TWaitResultAnalysis(String threadName, String uuid, String type) {
         this.uuid = uuid;
-        this.fileName = fileName;
-        this.user = user;
-
-        thread.start();
+        this.type = type;
+        thread = new Thread(this, threadName);
     }
 
     @Override
@@ -38,6 +38,7 @@ public class TWaitResult implements Runnable {
             while (call()) {
                 Thread.sleep(5000);
             }
+
             if (!message.isEmpty()){
                 try {
                     fileUtils.logs(message);
@@ -45,6 +46,7 @@ public class TWaitResult implements Runnable {
                     System.out.println(message);
                 }
             }
+
         } catch (InterruptedException e) {
             System.out.println("|Ошибка потока " + thread.getName() + ": " + e.getMessage());
         }
@@ -62,7 +64,23 @@ public class TWaitResult implements Runnable {
                 return false;
             }
 
-            RequestBuilder request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/predict/status/" + uuid);
+            RequestBuilder request;
+
+            switch (type){
+                case "predict" ->
+                    request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/predict/status/" + uuid);
+
+                case "teach" ->
+                    request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/teach/status/" + uuid);
+
+                default -> {
+                    text = "Данного потокового типа не найдено: " + type;
+                    System.out.println(text);
+                    message = text;
+                    return false;
+                }
+            }
+
 
             String result = request.send();
 
@@ -87,26 +105,7 @@ public class TWaitResult implements Runnable {
                 message = text;
                 return false;
             }
-
-            if (info.equals("Finish")) {
-                OutMessage outMessage = new OutMessage();
-                outMessage.setLogin(user);
-                outMessage.setType("FileResult");
-                outMessage.setMessage(jsonb.toJson(new HashMap<>(){{
-                    put("uuid", uuid);
-                    put("fileName", fileName);
-                }}));
-
-                DUserConnect.Analysis analysis = new DUserConnect.Analysis();
-
-                analysis.setUuid(uuid);
-                analysis.setFileName(fileName);
-                analysis.setStatus(false);
-                new WebSocket().sendResultMessage(outMessage, user, analysis);
-                return false;
-            }
-
-            return true;
+            return !info.equals("Finish");
         } catch (Exception e) {
             text = "|Ошибка потока " + thread.getName() + ": " + e.getMessage();
             System.out.println(text);
