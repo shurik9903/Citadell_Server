@@ -4,6 +4,7 @@ public class DTeaching {
     private String name;
     private String column;
     private String select;
+    private String modelID;
 
     public String getName() {
         return name;
@@ -29,7 +30,13 @@ public class DTeaching {
         this.select = select;
     }
 
+    public String getModelID() {
+        return modelID;
+    }
 
+    public void setModelID(String modelID) {
+        this.modelID = modelID;
+    }
 
 
 }
