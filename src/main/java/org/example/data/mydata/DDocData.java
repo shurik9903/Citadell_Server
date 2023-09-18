@@ -9,6 +9,7 @@ public class DDocData {
         private String select;
         private String message;
         private String classComment;
+        private String analysisText;
 
         public String getClassComment() {
             return classComment;
@@ -48,6 +49,14 @@ public class DDocData {
 
         public void setMessage(String message) {
             this.message = message;
+        }
+
+        public String getAnalysisText() {
+            return analysisText;
+        }
+
+        public void setAnalysisText(String analysisText) {
+            this.analysisText = analysisText;
         }
 
     }
