@@ -13,7 +13,7 @@ public interface IDBDictionaryWork extends IDBWork {
 
     ArrayList<ESimpleWord> loadSimpleWords() throws Exception;
 
-    void saveSimpleWord(String word, int typeID) throws Exception;
+    void saveSimpleWord(String word, int typeID, String description) throws Exception;
 
     void deleteSimpleWord(int wordID) throws Exception;
 
@@ -21,13 +21,13 @@ public interface IDBDictionaryWork extends IDBWork {
 
     ArrayList<ESpellingVariants> loadSpellingWords() throws Exception;
 
-    void saveSpellingWord(String word, int simpleID) throws Exception;
+    void saveSpellingWord(String word, int simpleID, String description) throws Exception;
 
     void deleteSpellingWord(int wordID) throws Exception;
 
     ArrayList<ETypeWord> loadTypeWords() throws Exception;
 
-    void updateSimpleWord(int wordID, String word, int typeID) throws Exception;
+    void updateSimpleWord(int wordID, String word, int typeID, String description) throws Exception;
 
-    void updateSpellingWord(int wordID, String word, int simpleID) throws Exception;
+    void updateSpellingWord(int wordID, String word, String description) throws Exception;
 }
