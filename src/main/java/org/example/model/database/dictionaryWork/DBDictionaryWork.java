@@ -72,7 +72,7 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
     }
 
     @Override
-    public void saveSimpleWord(String word, int typeID) throws Exception {
+    public void saveSimpleWord(String word, int typeID, String description) throws Exception {
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerConstructor();
@@ -112,8 +112,8 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
 
             ESimpleWord eSimpleWord = (ESimpleWord) query.getResultList().get(query.getFirstResult());
 
-            query = entityManager.createNativeQuery("Insert into spelling_variants (word, simple_id) values (?, ?::integer)");
-            query.setParameter(1, word).setParameter(2, eSimpleWord.getId()).executeUpdate();
+            query = entityManager.createNativeQuery("Insert into spelling_variants (word, simple_id, description) values (?, ?::integer, ?)");
+            query.setParameter(1, word).setParameter(2, eSimpleWord.getId()).setParameter(3, description).executeUpdate();
 
             transaction.commit();
 
@@ -127,13 +127,15 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
     }
 
     @Override
-    public void updateSimpleWord(int wordID, String word, int typeID) throws Exception {
+    public void updateSimpleWord(int wordID, String word, int typeID, String description) throws Exception {
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerConstructor();
 
             transaction.begin();
             entityManager.joinTransaction();
+
+
 
             Query query = entityManager.createNativeQuery("Select * from simple_words where id = ?::integer", ESimpleWord.class);
             query.setParameter(1, wordID);
@@ -155,6 +157,15 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
 
             ESpellingVariants eSpellingVariants = (ESpellingVariants) query.getResultList().get(query.getFirstResult());
 
+            if (description == null)
+                description = eSpellingVariants.getDescription();
+
+            if (word.isEmpty())
+                word = eSimpleWord.getWord();
+
+            if (typeID <= 0)
+                typeID = eSimpleWord.getType_id();
+
             query = entityManager.createNativeQuery("Select * from types_words where id = ?::integer", ETypeWord.class);
             query.setParameter(1, typeID);
 
@@ -163,8 +174,8 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
                 throw new Exception("Данный тип слова отсутствует в словаре");
             }
 
-            query = entityManager.createNativeQuery("Update spelling_variants set word = ? where id = ?::integer");
-            query.setParameter(1, word).setParameter(2, wordID).setParameter(3, eSpellingVariants.getId()).executeUpdate();
+            query = entityManager.createNativeQuery("Update spelling_variants set word = ?, description = ? where id = ?::integer");
+            query.setParameter(1, word).setParameter(2, description).setParameter(3, eSpellingVariants.getId()).executeUpdate();
 
             query = entityManager.createNativeQuery("Update simple_words set word = ?, type_id = ?::integer where id = ?::integer");
             query.setParameter(1, word).setParameter(2, typeID).setParameter(3, wordID).executeUpdate();
@@ -309,7 +320,7 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
 
 
     @Override
-    public void saveSpellingWord(String word, int simpleID) throws Exception {
+    public void saveSpellingWord(String word, int simpleID, String description) throws Exception {
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerConstructor();
@@ -334,8 +345,8 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
             }
 
 
-            query = entityManager.createNativeQuery("Insert into spelling_variants (word, simple_id) values (?, ?::integer)");
-            query.setParameter(1, word).setParameter(2, simpleID).executeUpdate();
+            query = entityManager.createNativeQuery("Insert into spelling_variants (word, simple_id, description) values (?, ?::integer, ?)");
+            query.setParameter(1, word).setParameter(2, simpleID).setParameter(3, description).executeUpdate();
 
             transaction.commit();
 
@@ -350,7 +361,7 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
 
 
     @Override
-    public void updateSpellingWord(int wordID, String word, int simpleID) throws Exception {
+    public void updateSpellingWord(int wordID, String word, String description) throws Exception {
         EntityManager entityManager = null;
         try {
             entityManager = entityManagerConstructor();
@@ -358,15 +369,7 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
             transaction.begin();
             entityManager.joinTransaction();
 
-            Query query = entityManager.createNativeQuery("Select * from simple_words where id = ?::integer", ESimpleWord.class);
-            query.setParameter(1, simpleID);
-
-            if (query.getResultList().size() == 0) {
-                transaction.commit();
-                throw new Exception("Данное слово отсутствует в словаре");
-            }
-
-            query = entityManager.createNativeQuery("Select * from spelling_variants where id = ?::integer", ESpellingVariants.class);
+            Query query = entityManager.createNativeQuery("Select * from spelling_variants where id = ?::integer", ESpellingVariants.class);
             query.setParameter(1, wordID);
 
             if (query.getResultList().size() == 0) {
@@ -376,11 +379,29 @@ public class DBDictionaryWork extends DBConstructor implements IDBDictionaryWork
 
             ESpellingVariants eSpellingVariants = (ESpellingVariants) query.getResultList().get(query.getFirstResult());
 
-            query = entityManager.createNativeQuery("Update spelling_variants set word = ?, simple_id = ?::integer where id = ?::integer");
-            query.setParameter(1, word).setParameter(2, simpleID).setParameter(3, wordID).executeUpdate();
+
+            query = entityManager.createNativeQuery("Select * from simple_words where id = ?::integer", ESimpleWord.class);
+            query.setParameter(1, eSpellingVariants.getSimple_id());
+
+            if (query.getResultList().size() == 0) {
+                transaction.commit();
+                throw new Exception("Данное слово отсутствует в словаре");
+            }
+
+            ESimpleWord eSimpleWord = (ESimpleWord) query.getResultList().get(query.getFirstResult());
+
+
+            if (word.isEmpty())
+                word = eSpellingVariants.getWord();
+
+            if (description == null)
+                description = eSpellingVariants.getWord();
+
+            query = entityManager.createNativeQuery("Update spelling_variants set word = ?, description = ? where id = ?::integer");
+            query.setParameter(1, word).setParameter(2, description).setParameter(3, wordID).executeUpdate();
 
             query = entityManager.createNativeQuery("Update simple_words set word = ? where id = ?::integer and word = ?");
-            query.setParameter(1, word).setParameter(2, simpleID).setParameter(3, eSpellingVariants.getWord()).executeUpdate();
+            query.setParameter(1, word).setParameter(2, eSimpleWord.getId()).setParameter(3, eSpellingVariants.getWord()).executeUpdate();
 
             transaction.commit();
 
