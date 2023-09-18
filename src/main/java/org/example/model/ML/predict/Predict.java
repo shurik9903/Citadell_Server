@@ -13,12 +13,9 @@ public class Predict implements IPredict{
     @Override
     public Response getPredictStatus(String uuid){
         try {
-            Jsonb jsonb = JsonbBuilder.create();
-            Map<String, String> jsonOut = new HashMap<>();
 
             if (uuid == null) {
-                jsonOut.put("msg", "Не указан uuid анализируемых данных");
-                Response.ok(jsonb.toJson(jsonOut)).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Не указан uuid анализируемых данных").build();
             }
 
             RequestBuilder request = new RequestBuilder(RequestBuilder.Method.POST, "api/v1/predict/status/" + uuid);
@@ -38,12 +35,8 @@ public class Predict implements IPredict{
     @Override
     public Response getPredictResult(String uuid){
         try {
-            Jsonb jsonb = JsonbBuilder.create();
-            Map<String, String> jsonOut = new HashMap<>();
-
             if (uuid == null) {
-                jsonOut.put("msg", "Не указан uuid анализируемых данных");
-                Response.ok(jsonb.toJson(jsonOut)).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Не указан uuid анализируемых данных").build();
             }
 
             RequestBuilder request = new RequestBuilder(RequestBuilder.Method.POST, "api/v1/predict/result/" + uuid);
