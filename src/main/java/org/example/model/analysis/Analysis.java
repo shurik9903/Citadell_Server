@@ -4,12 +4,16 @@ import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
 import jakarta.ws.rs.core.Response;
+import org.example.controller.WebSocket.Message.OutMessage;
+import org.example.controller.WebSocket.WebSocket;
 import org.example.controller.request.RequestBuilder;
 import org.example.data.mydata.DAnalysis;
 import org.example.data.mydata.DAnalysisResult;
 import org.example.data.mydata.DUserConnect;
-import org.example.model.ML.thread.TWaitResult;
+import org.example.model.ML.thread.TWaitDictionaryWordsFind;
+import org.example.model.ML.thread.TWaitResultAnalysis;
 import org.example.model.connections.IUserConnections;
+import org.example.model.database.dictionaryWork.IDBDictionaryWork;
 import org.example.model.doc.docReader.DocReaderFactory;
 import org.example.model.doc.docReader.IDocReader;
 import org.example.model.properties.ServerProperties;
@@ -21,29 +25,35 @@ import java.util.*;
 public class Analysis implements IAnalysis {
 
     @Inject
+    private IDBDictionaryWork dataBase;
+
+    @Inject
     private IUserConnections userConnections;
 
     @Inject
     private IFileUtils fileUtils;
 
     @Override
-    public Response startAnalysis(String json, String userLogin, String userID){
+    public Response startAnalysis(String json, String userLogin, String userID) {
         try {
+
+            dataBase.ping();
+
             Jsonb jsonb = JsonbBuilder.create();
             Map<String, String> jsonOut = new HashMap<>();
 
+            DAnalysis analysis = jsonb.fromJson(json, DAnalysis.class);
 
-            DAnalysis analysis =  jsonb.fromJson(json, DAnalysis.class);
-
-
-            if (analysis.getName().isEmpty() || analysis.getColumn().isEmpty() || analysis.getSelect().isEmpty()){
-                jsonOut.put("msg", "Ошибка данных, отсутствует название файла или номер столбца");
-                return Response.ok(jsonb.toJson(jsonOut)).build();
+            if (analysis.getName().isEmpty() || analysis.getColumn().isEmpty() || analysis.getSelect().isEmpty()) {
+                return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка данных, отсутствует название файла или номер столбца").build();
             }
 
-            IDocReader docReader = DocReaderFactory.getDocReader(analysis.getName().substring(analysis.getName().lastIndexOf('.')));
+            String docType = analysis.getName().substring(analysis.getName().lastIndexOf('.'));
+            String pathToFile = ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + analysis.getName();
+
+            IDocReader docReader = DocReaderFactory.getDocReader(docType);
             ArrayList<Map<String, Object>> columns = docReader.parserSelectColumn(
-                    ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + analysis.getName(),
+                    pathToFile,
                     Integer.parseInt(analysis.getColumn()),
                     Integer.parseInt(analysis.getSelect()));
 
@@ -68,12 +78,53 @@ public class Analysis implements IAnalysis {
 
 
             if (uuid.isEmpty()) {
-                jsonOut.put("msg", "Ошибка данных, uuid не выделен.");
-                return Response.ok(jsonb.toJson(jsonOut)).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Ошибка данных, uuid не выделен.").build();
             }
 
-            new TWaitResult(userLogin+"|"+analysis.getName(), uuid, analysis.getName(), userLogin);
+            new Thread() {
+                @Override
+                public void run() {
+                    super.run();
 
+                    try {
+                        TWaitResultAnalysis tWaitResultAnalysis = new TWaitResultAnalysis(userLogin + "|" + analysis.getName(), uuid, "predict");
+
+                        TWaitDictionaryWordsFind tWaitDictionaryWordsFind = new TWaitDictionaryWordsFind(userLogin + "|" + analysis.getName(), columns, dataBase.loadSpellingWords(), (docData) -> {
+                            try {
+                                docReader.updateDoc(pathToFile, docData, userID);
+                            } catch (Exception e) {
+                                System.out.println("Ошибка: " + e.getMessage());
+                                e.printStackTrace();
+                            }
+                        });
+
+                        tWaitResultAnalysis.getThread().start();
+                        tWaitDictionaryWordsFind.getThread().start();
+
+                        tWaitResultAnalysis.getThread().join();
+                        tWaitDictionaryWordsFind.getThread().join();
+
+                        OutMessage outMessage = new OutMessage();
+                        outMessage.setLogin(userLogin);
+                        outMessage.setType("FilePredictResult");
+                        outMessage.setMessage(jsonb.toJson(new HashMap<>() {{
+                            put("uuid", uuid);
+                            put("fileName", analysis.getName());
+                        }}));
+
+                        DUserConnect.Analysis statusAnalysis = new DUserConnect.Analysis();
+
+                        statusAnalysis.setUuid(uuid);
+                        statusAnalysis.setFileName(analysis.getName());
+                        statusAnalysis.setStatus(false);
+                        new WebSocket().sendResultMessage(outMessage, userLogin, statusAnalysis);
+
+                    } catch (Exception e) {
+                        System.out.println("Ошибка " + e.getMessage());
+                    }
+
+                }
+            }.start();
 
             DUserConnect.Analysis userAnalysisData = new DUserConnect.Analysis();
             userAnalysisData.setFileName(analysis.getName());
@@ -83,21 +134,17 @@ public class Analysis implements IAnalysis {
 
             return Response.ok(jsonb.toJson(jsonOut)).build();
 
-        } catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
     }
 
     @Override
-    public Response getAnalysisStatus(String uuid){
+    public Response getAnalysisStatus(String uuid) {
         try {
-            Jsonb jsonb = JsonbBuilder.create();
-            Map<String, String> jsonOut = new HashMap<>();
-
             if (uuid == null) {
-                jsonOut.put("msg", "Не указан uuid анализируемых данных");
-                Response.ok(jsonb.toJson(jsonOut)).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Не указан uuid анализируемых данных").build();
             }
 
             RequestBuilder request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/predict/status/" + uuid);
@@ -115,15 +162,13 @@ public class Analysis implements IAnalysis {
     }
 
     @Override
-    public Response getAnalysisResult(String uuid, String userLogin){
+    public Response getAnalysisResult(String uuid, String userLogin) {
         try {
 
             Jsonb jsonb = JsonbBuilder.create();
-            Map<String, String> jsonOut = new HashMap<>();
 
             if (uuid == null) {
-                jsonOut.put("msg", "Не указан uuid анализируемых данных");
-                Response.ok(jsonb.toJson(jsonOut)).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Не указан uuid анализируемых данных").build();
             }
 
             RequestBuilder request = new RequestBuilder(RequestBuilder.Method.GET, "api/v1/predict/result/" + uuid);
@@ -133,42 +178,19 @@ public class Analysis implements IAnalysis {
 
             String message = data.getMessage();
 
-            if (message != null){
+            if (message != null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
             DUserConnect.Analysis analysis = userConnections.getAnalysisFile(uuid, userLogin);
 
-            if (analysis == null){
+            if (analysis == null) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("файл с данным uuid не найден " + uuid).build();
             }
 
 
             String fileName = analysis.getFileName();
 
-//            ArrayList<DReport> reports = fileUtils.getReportFile(ServerProperties.getProperty("filepath") + File.separator + userLogin + File.separator + fileName);
-
-//            Set<String> unavailableItems = data.getComments().stream()
-//                    .map(analysisRows ->  String.valueOf(analysisRows.getNumber()))
-//                    .collect(Collectors.toSet());
-//
-//
-//            List<DReport> unavailable = reports.stream()
-//                    .filter(e -> unavailableItems.contains(e.getRowNum()))
-//                    .collect(Collectors.toList());
-
-//            data.getComments().forEach(analysisRows -> {
-//
-//                Optional<DReport> report = reports.stream().filter(dReport -> dReport.getRowNum().equals(String.valueOf(analysisRows.getNumber()))).findFirst();
-//
-//                if (report.isPresent()){
-//                   report.get().set
-//                }
-//
-//            });
-
-
-//            reports.stream().filter(dReport -> dReport.);
             fileUtils.logs(result);
 
             IDocReader docReader = DocReaderFactory.getDocReader(fileName.substring(fileName.lastIndexOf('.')));
@@ -193,13 +215,13 @@ public class Analysis implements IAnalysis {
         Optional<DUserConnect> findUser = userConnects.stream()
                 .filter(dUserConnect -> dUserConnect.getUserLogin().equals(userLogin)).findFirst();
 
-        if (findUser.isPresent()){
+        if (findUser.isPresent()) {
 
             Optional<DUserConnect.Analysis> selectFile = findUser.get().getAnalysis().stream().filter(value ->
-                value.getFileName().equals(analysis.getFileName())
-             ).findFirst();
+                    value.getFileName().equals(analysis.getFileName())
+            ).findFirst();
 
-            if (selectFile.isPresent()){
+            if (selectFile.isPresent()) {
                 selectFile.get().setUuid(analysis.getUuid());
             } else {
                 findUser.get().getAnalysis().add(analysis);
