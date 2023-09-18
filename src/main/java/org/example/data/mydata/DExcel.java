@@ -13,6 +13,7 @@ public class DExcel {
     private Map<Integer, ArrayList<String>> rows = null;
     private Map<Integer, String> type = null;
     private ArrayList<String> title = null;
+    private ArrayList<String> titleTypes = null;
     private String Msg = "";
 
     public DExcel(){}
@@ -21,11 +22,20 @@ public class DExcel {
         this.Msg = Msg;
     }
 
-    public DExcel(Integer rowNumber, Map<Integer, ArrayList<String>> rows, ArrayList<String> title, Map<Integer, String> type){
+    public DExcel(Integer rowNumber, Map<Integer, ArrayList<String>> rows, ArrayList<String> title, ArrayList<String> titleTypes, Map<Integer, String> type){
         this.rowNumber = rowNumber;
         this.rows = rows;
         this.title = title;
+        this.titleTypes = titleTypes;
         this.type = type;
+    }
+
+    public ArrayList<String> getTitleTypes() {
+        return titleTypes;
+    }
+
+    public void setTitleTypes(ArrayList<String> titleTypes) {
+        this.titleTypes = titleTypes;
     }
 
     public Map<Integer, String> getType() {
