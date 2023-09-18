@@ -8,6 +8,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.example.data.entity.EFile;
 import org.example.data.entity.EReport;
 import org.example.data.mydata.DReport;
+import org.example.data.mydata.DUserConnect;
+import org.example.model.connections.IUserConnections;
 import org.example.model.database.fileWork.IDBFileWork;
 import org.example.model.database.reportWork.IDBReportWork;
 import org.example.model.doc.docReader.DocReaderFactory;
@@ -20,6 +22,7 @@ import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class WorkingFiles implements IWorkingFiles {
