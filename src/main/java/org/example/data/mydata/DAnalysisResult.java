@@ -45,6 +45,7 @@ public class DAnalysisResult {
     }
 
     private String Message;
+    private String Model;
     private ArrayList<AnalysisRows> comments;
 
     public ArrayList<AnalysisRows> getComments() {
@@ -61,6 +62,14 @@ public class DAnalysisResult {
 
     public void setMessage(String message) {
         Message = message;
+    }
+
+    public String getModel() {
+        return Model;
+    }
+
+    public void setModel(String model) {
+        Model = model;
     }
 
 }
