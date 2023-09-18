@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Dictionary implements IDictionary {
+
     @Inject
     private IDBDictionaryWork dataBase;
 
@@ -71,7 +72,7 @@ public class Dictionary implements IDictionary {
 
             DWord dWord =  jsonb.fromJson(word, DWord.class);
 
-            dataBase.saveSimpleWord(dWord.getWord(), dWord.getTypeID());
+            dataBase.saveSimpleWord(dWord.getWord(), dWord.getTypeID(), dWord.getDescription());
 
             return Response.ok(jsonb.toJson("ok")).build();
 
@@ -90,7 +91,9 @@ public class Dictionary implements IDictionary {
 
             DWord dWord =  jsonb.fromJson(word, DWord.class);
 
-            dataBase.updateSimpleWord(dWord.getId(), dWord.getWord(), dWord.getTypeID());
+            System.out.println("test " + dWord.getId() + " " + dWord.getWord() + " " + dWord.getDescription() + " " + dWord.getTypeID());
+
+            dataBase.updateSimpleWord(dWord.getId(), dWord.getWord(), dWord.getTypeID(), dWord.getDescription());
 
             return Response.ok(jsonb.toJson("ok")).build();
 
@@ -169,7 +172,7 @@ public class Dictionary implements IDictionary {
 
             DWord dWord =  jsonb.fromJson(word, DWord.class);
 
-            dataBase.saveSpellingWord(dWord.getWord(), dWord.getSimpleID());
+            dataBase.saveSpellingWord(dWord.getWord(), dWord.getSimpleID(), dWord.getDescription());
 
             return Response.ok(jsonb.toJson("ok")).build();
 
@@ -208,7 +211,7 @@ public class Dictionary implements IDictionary {
 
             DWord dWord =  jsonb.fromJson(word, DWord.class);
 
-            dataBase.updateSpellingWord(dWord.getId(), dWord.getWord(), dWord.getSimpleID());
+            dataBase.updateSpellingWord(dWord.getId(), dWord.getWord(), dWord.getDescription());
 
             return Response.ok(jsonb.toJson("ok")).build();
 
