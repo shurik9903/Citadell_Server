@@ -117,8 +117,6 @@ public class UserConnections implements IUserConnections {
     public void setUserData(String sessionID, String userLogin) throws Exception {
         Jsonb jsonb = JsonbBuilder.create();
 
-        FileUtils fileUtils = new FileUtils();
-
         ArrayList<DUserConnect> userConnects = getUserConnect();
 
         Optional<DUserConnect> findUser = userConnects.stream()
@@ -140,8 +138,6 @@ public class UserConnections implements IUserConnections {
     @Override
     public void delUserData(String sessionID) throws Exception {
         Jsonb jsonb = JsonbBuilder.create();
-
-        FileUtils fileUtils = new FileUtils();
 
         ArrayList<DUserConnect> userConnects = getUserConnect();
 
