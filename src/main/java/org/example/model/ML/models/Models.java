@@ -104,4 +104,34 @@ public class Models implements IModels {
 
     }
 
+    @Override
+    public Response updateModel(int modelID, String name) {
+        try {
+
+            Jsonb jsonb = JsonbBuilder.create();
+            Map<String, String> jsonOut = new HashMap<>();
+
+            Map<String, String> jsonParse = new HashMap<>();
+            jsonParse = (Map<String, String>) jsonb.fromJson(name, jsonParse.getClass());
+
+            String newName = String.valueOf(jsonParse.getOrDefault("NameModel", ""));
+
+            if (newName.isEmpty())
+                throw new Exception("Не указано новое имя модели");
+
+            RequestBuilder request = new RequestBuilder(RequestBuilder.Method.PUT, "api/v1/models/"+modelID);
+            request.setBody(jsonb.fromJson(name, HashMap.class));
+
+            String result = request.send();
+
+            if (request.responseCode != 200)
+                return Response.status(request.responseCode).entity(result).build();
+
+            return Response.ok(result).build();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+    }
+
 }
