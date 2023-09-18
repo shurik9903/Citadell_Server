@@ -19,6 +19,9 @@ public class ESpellingVariants {
     @Column(name = "\"simple_id\"")
     private Integer simple_id;
 
+    @Column(name = "\"description\"")
+    private String description;
+
     public ESpellingVariants(){};
 
     public Integer getId() {
@@ -45,4 +48,11 @@ public class ESpellingVariants {
         this.simple_id = simple_id;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }
