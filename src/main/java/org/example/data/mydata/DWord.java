@@ -6,6 +6,7 @@ public class DWord {
     private String word;
     private Integer typeID;
     private Integer simpleID;
+    private String description;
 
     public Integer getId() {
         return id;
@@ -20,6 +21,10 @@ public class DWord {
     }
 
     public void setWord(String word) {
+
+        if (word == null)
+            word = "";
+
         this.word = word;
     }
 
@@ -28,6 +33,10 @@ public class DWord {
     }
 
     public void setTypeID(Integer typeID) {
+
+        if (typeID == null)
+            typeID = -1;
+
         this.typeID = typeID;
     }
 
@@ -38,5 +47,11 @@ public class DWord {
     public void setSimpleID(Integer simpleID) {
         this.simpleID = simpleID;
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {this.description = description;}
 
 }
